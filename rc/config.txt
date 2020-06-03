@@ -1,0 +1,8 @@
+# name of the locale file (whithout extension)
+locale = sFR
+# show legal places when selecting a tile
+forceHints = btrue
+# show rack of AI during their turn
+showAiRack = btrue
+# time in ms to wait after an AI has played
+waitAfterAiTurnTime = i100000

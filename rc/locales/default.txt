@@ -1,0 +1,9 @@
+with SFML = with SFML
+Start = Start
+Player = Player
+Players = Players
+Computer = Computer
+Computers = Computers
+Game ended = Game ended
+Scores = Scores
+Remaining tiles = Remaining tiles

@@ -1,0 +1,9 @@
+.idea
+cmake-build-*
+rc/sprites/tmp
+rc/shaders
+*.zip
+*.exe
+*.rc
+*.ico
+*.7z

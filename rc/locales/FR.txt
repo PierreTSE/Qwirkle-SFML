@@ -1,0 +1,9 @@
+with SFML = avec la SFML
+Start = Début
+Player = Joueur
+Players = Joueurs
+Computer = Ordinateur
+Computers = Ordinateurs
+Game ended = Le jeu est terminé
+Scores = Scores
+Remaining tiles = Tuiles restantes
