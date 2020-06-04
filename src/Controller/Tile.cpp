@@ -1,5 +1,6 @@
 #include "RessourceLoader.hpp"
 #include "Tile.hpp"
+#include "Settings.hpp"
 #include "Utilities.hpp"
 #include <cassert>
 
@@ -31,16 +32,32 @@ bool Tile::operator<(const Tile& rhs) const {
 }
 
 sf::Color type2color(TileColor type) {
-    switch (type) {
-        case Red:return {255, 0, 0};
-        case Green:return {54, 255, 9};
-        case Blue:return {35, 153, 255};
-        case Purple:return {208, 61, 255};
-        case Orange:return {240, 124, 0};
-        case Yellow:return {246, 255, 0};
-        case White:return sf::Color::White;
-        case Pink:return sf::Color{255, 0, 255};
-        default:throw std::runtime_error("type2color default case");
+    auto colorblind = Settings::get("colorblind");
+    if (colorblind && std::get<bool>(colorblind.value())) {
+        // colorblind
+        switch (type) {
+            case Red:return {136, 34, 85};
+            case Green:return {17, 119, 51};
+            case Blue:return {68, 170, 153};
+            case Purple:return {51, 34, 136};
+            case Orange:return {204, 124, 0};
+            case Yellow:return {221, 204, 119};
+            case White:return {136, 204, 238};
+            case Pink:return {170, 68, 153};
+            default:throw std::runtime_error("type2color default case (colorblind)");
+        }
+    } else {
+        switch (type) {
+            case Red:return {255, 0, 0};
+            case Green:return {54, 255, 9};
+            case Blue:return {35, 153, 255};
+            case Purple:return {208, 61, 255};
+            case Orange:return {240, 124, 0};
+            case Yellow:return {246, 255, 0};
+            case White:return sf::Color::White;
+            case Pink:return {255, 0, 255};
+            default:throw std::runtime_error("type2color default case");
+        }
     }
 }
 

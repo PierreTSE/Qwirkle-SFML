@@ -19,7 +19,7 @@ Localisator::Localisator() {
     std::string line;
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     while (std::getline(locale, line)) {
-        if (line.at(0) == '#') continue;
+        if (line.empty() || line.at(0) == '#') continue;
         auto v = split(line, " = ");
         if (v.size() != 2)
             throw std::runtime_error("Error in locale file " + localeName + ".txt : " + line);
