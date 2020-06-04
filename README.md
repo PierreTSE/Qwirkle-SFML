@@ -2,6 +2,8 @@
 
 The [Qwirkle](https://en.wikipedia.org/wiki/Qwirkle) game in C++, based on the [SFML](https://www.sfml-dev.org/index.php).
 
+![alt text](img/screenshot.jpg "Screenshot of the game")
+
 ### Installation from source
 
 You can compile the source code using CMake and a C++17 compliant compiler.
