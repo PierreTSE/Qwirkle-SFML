@@ -6,11 +6,10 @@ std::mt19937_64& RandomEngine::instance() {
     #if defined(WIN32) && (defined(__GNUC__) || defined(__GNUG__)) && !defined(_GLIBCXX_USE_DEV_RANDOM)
     static std::mt19937_64 random_engine(std::time(nullptr));
     #else
-    static std::default_random_engine random_engine(std::random_device{}());
+    static std::mt19937_64 random_engine(std::random_device{}());
     #endif
     return random_engine;
 }
-
 
 sf::Vector2f normalize(const sf::Vector2f& source) {
     const float length = std::hypot(source.x, source.y);

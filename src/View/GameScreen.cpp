@@ -34,7 +34,7 @@ GameScreen::GameScreen(sf::RenderWindow& window, std::vector<PlayerType> const& 
     centerOrigin(recycleFeedback);
     recycleFeedback.setScale(0.75, 0.75);
 
-    text.setFont(RessourceLoader::getFont("fonts/ubuntu-R.ttf"));
+    text.setFont(RessourceLoader::getFont("fonts/Ubuntu-R.ttf"));
     text.setFillColor(sf::Color::White);
 
     // settings
