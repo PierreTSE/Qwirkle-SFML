@@ -1,5 +1,5 @@
-#include <iostream>
 #include "Player.hpp"
+#include <iostream>
 
 Player::Player(std::wstring name, Controller& controller, sf::Vector2u const& windowSize) :
         rack(40, 40, 1, 6, 5, sf::Color::White),

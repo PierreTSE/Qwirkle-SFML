@@ -1,8 +1,8 @@
 # name of the locale file (whithout extension)
 locale = sFR
 # show legal places when selecting a tile
-forceHints = btrue
+forceHints = bfalse
 # show rack of AI during their turn
-showAiRack = btrue
+showAiRack = bfalse
 # time in ms to wait after an AI has played
-waitAfterAiTurnTime = i100000
+waitAfterAiTurnTime = i0

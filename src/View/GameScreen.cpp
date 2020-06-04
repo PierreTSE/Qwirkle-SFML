@@ -1,11 +1,11 @@
 #include "GameScreen.hpp"
-#include "Ai.hpp"
+#include "../Controller/Ai.hpp"
+#include "EndScreen.hpp"
 #include "GlobalClock.hpp"
 #include "Localisator.hpp"
 #include "RessourceLoader.hpp"
 #include "Settings.hpp"
 #include "Utilities.hpp"
-#include "View/EndScreen.hpp"
 #include <iostream>
 
 GameScreen::GameScreen(sf::RenderWindow& window, std::vector<PlayerType> const& playerTypes) :
@@ -347,8 +347,8 @@ void GameScreen::endTurnPlayer(bool forced) {
     grid.tiles.erase(std::remove_if(grid.tiles.begin(), grid.tiles.end(),
                                     [](auto const& e) { return e.shapeID == 6; }), grid.tiles.end());
     // passe la main
-    player_idx = ++player_idx % players.size();
-
+    player_idx++;
+    player_idx %= players.size();
     // vérifie la fin de jeu
     if (controller.reserve.empty() && !players.at(player_idx)->canPlay(controller))
         endGame = true;
@@ -364,8 +364,10 @@ void GameScreen::endTurnAi() {
     ai->rack.updateTilesPositions();
     // reset les coups joués
     ai->moves.clear();
-    // passe la main, vérifie la fin du jeu
-    player_idx = ++player_idx % players.size();
+    // passe la main
+    player_idx++;
+    player_idx %= players.size();
+    // vérifie la fin de jeu
     if (controller.reserve.empty() && !players.at(player_idx)->canPlay(controller))
         endGame = true;
 }

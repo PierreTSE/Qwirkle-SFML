@@ -1,5 +1,5 @@
 #include "TitleScreen.hpp"
-#include "../GameScreen.hpp"
+#include "GameScreen.hpp"
 #include "Localisator.hpp"
 #include "RessourceLoader.hpp"
 #include "Utilities.hpp"
@@ -52,8 +52,7 @@ std::unique_ptr<Screen> TitleScreen::execute() {
             auto result = manageEvent(event);
             if (result) return std::move(*result);
             switch (event.type) {
-                case sf::Event::MouseButtonReleased:
-                case sf::Event::KeyReleased: {
+                case sf::Event::KeyPressed: {
                     switch (event.key.code) {
                         case sf::Keyboard::Up: if (cursorPos > 0) cursorPos -= 1;
                             break;

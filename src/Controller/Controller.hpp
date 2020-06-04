@@ -1,7 +1,7 @@
 #ifndef QWIRKLE_CONTROLLER_HPP
 #define QWIRKLE_CONTROLLER_HPP
 
-#include "../Tile.hpp"
+#include "Tile.hpp"
 #include <vector>
 
 

@@ -19,7 +19,7 @@ void Ui::draw(sf::RenderWindow& window) const {
 }
 
 void Ui::replace(sf::Vector2u const& windowSize) {
-    setPosition(static_cast<float>(windowSize.x) / 2 + 137.5, static_cast<float>(windowSize.y) - 102);
+    setPosition(static_cast<float>(windowSize.x) / 2 + 137.5f, static_cast<float>(windowSize.y) - 102);
     recycleButton.setPosition(getPosition() + sf::Vector2f{10 + 20, 5 + 20});
     nextTurnButton.setPosition(getPosition() + sf::Vector2f{10 + 45 + 20, 5 + 20});
 }

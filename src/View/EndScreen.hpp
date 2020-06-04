@@ -1,7 +1,7 @@
 #ifndef QWIRKLE_SFML_ENDSCREEN_HPP
 #define QWIRKLE_SFML_ENDSCREEN_HPP
 
-#include "../Player.hpp"
+#include "../Controller/Player.hpp"
 #include "Screen.hpp"
 
 class EndScreen : public Screen {

@@ -1,11 +1,11 @@
 #ifndef QWIRKLE_GAMESCREEN_HPP
 #define QWIRKLE_GAMESCREEN_HPP
 
-#include "Controller/Controller.hpp"
+#include "../Controller/Controller.hpp"
+#include "../Controller/Player.hpp"
+#include "../UI/Ui.hpp"
 #include "Grid.hpp"
-#include "Player.hpp"
 #include "Screen.hpp"
-#include "UI/Ui.hpp"
 #include <utility>
 
 

@@ -34,7 +34,7 @@ std::vector<TileDataWithCoord> Ai::play(Controller const& controller) {
         if (it != rack.tiles.end()) it->disp = false;
     }
     score += max_score;
-    std::cout << "score ordi : " << max_score << std::endl;
+    // std::cout << "score ordi : " << max_score << std::endl;
     hasPlayed = true;
     return moves;
 }
@@ -117,4 +117,5 @@ void Ai::recycle(Controller& controller) {
     controller.random_shuffle();
     rack.tiles.clear();
     refillRack(toRefill, controller);
+    rack.updateTilesPositions();
 }

@@ -13,7 +13,7 @@ struct Tile;
 
 struct TileData {
     TileData() = default;
-    TileData(unsigned short shapeID, TileColor color);
+    TileData(unsigned char shapeID, TileColor color);
     explicit TileData(Tile const&);
     bool operator==(const TileData& rhs) const;
     bool operator!=(const TileData& rhs) const;
@@ -37,7 +37,7 @@ struct TileDataWithCoord : TileData {
 };
 
 struct Tile : public sf::Sprite {
-    Tile(unsigned short shapeID, TileColor color);
+    Tile(unsigned char shapeID, TileColor color);
 
     Tile(TileDataWithCoord const& rhs);
 
@@ -47,7 +47,7 @@ struct Tile : public sf::Sprite {
 
     bool operator<(const Tile& rhs) const;
 
-    unsigned short shapeID;
+    unsigned char shapeID;
     TileColor color;
 
     sf::Vector2i coord;

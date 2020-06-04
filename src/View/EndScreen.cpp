@@ -55,6 +55,13 @@ std::unique_ptr<Screen> EndScreen::execute() {
                     mouseLastPos = {event.mouseMove.x, event.mouseMove.y};
                 }
                     break;
+                case sf::Event::MouseWheelMoved: {
+                    auto scale = grid.getScale();
+                    auto f = 1 + 0.05f * event.mouseWheel.delta;
+                    grid.scale(f * scale.x, f * scale.y);
+                    grid.centerOrigin();
+                }
+                    break;
             }
         }
 

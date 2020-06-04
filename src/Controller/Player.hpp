@@ -1,8 +1,8 @@
 #ifndef QWIRKLE_PLAYER_HPP
 #define QWIRKLE_PLAYER_HPP
 
-#include "Controller/Controller.hpp"
-#include "Grid.hpp"
+#include "Controller.hpp"
+#include "../View/Grid.hpp"
 
 struct Player {
     Player(std::wstring name, Controller& controller, sf::Vector2u const& windowSize);

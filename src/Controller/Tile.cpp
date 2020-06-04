@@ -3,7 +3,7 @@
 #include "Utilities.hpp"
 #include <cassert>
 
-Tile::Tile(unsigned short shapeID, TileColor color) : shapeID(shapeID), color(color) {
+Tile::Tile(unsigned char shapeID, TileColor color) : shapeID(shapeID), color(color) {
     assert(shapeID <= 6);
     setTexture(RessourceLoader::getTexture("sprites/" + std::to_string(shapeID) + ".png"));
     setColor(type2color(color));
@@ -40,10 +40,11 @@ sf::Color type2color(TileColor type) {
         case Yellow:return {246, 255, 0};
         case White:return sf::Color::White;
         case Pink:return sf::Color{255, 0, 255};
+        default:throw std::runtime_error("type2color default case");
     }
 }
 
-TileData::TileData(unsigned short shapeID, TileColor color) : shapeID(shapeID), color(color) {
+TileData::TileData(unsigned char shapeID, TileColor color) : shapeID(shapeID), color(color) {
     assert(shapeID < 6);
 }
 

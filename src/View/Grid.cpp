@@ -1,6 +1,4 @@
 #include "Grid.hpp"
-#include <cassert>
-#include <iostream>
 
 Grid::Grid(float tileWidth, float tileHeight, unsigned int lineNumber, unsigned int colNumber, float lineThickness)
         : tileWidth_(tileWidth),
