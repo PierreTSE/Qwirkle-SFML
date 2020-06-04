@@ -3,17 +3,6 @@
 #include <unordered_set>
 
 Controller::Controller() {
-    // reserve.reserve(6 * 6 * 3);
-    // for (size_t i = 0; i < 3; ++i) {
-    //     for (size_t j = 0; j < 2; ++j) {
-    //         // for (size_t k = 0; k < 3; ++k) {
-    //             reserve.emplace_back(i, (TileColor) j);
-    //         // }
-    //     }
-    // }
-    // // random_shuffle();
-
-    // todo remettre
     reserve.reserve(6 * 6 * 3);
     for (size_t i = 0; i < 6; ++i) {
         for (size_t j = 0; j < 6; ++j) {
@@ -77,18 +66,15 @@ bool Controller::isMoveLegit(TileData const& tile, sf::Vector2i const& pos) cons
     enum State {
         START, SHAPE_LINE, COLOR_LINE
     };
-    const std::array<std::pair<sf::Vector2i, sf::Vector2i>, 2> directions = {{{{-1, 0}, {1, 0}}, {{0, -1}, {0, 1}}}};
-    bool isNotIsolated = false;
-    for (auto const& dir : directions) {
+    const std::array<sf::Vector2i, 2> directions = {{{1, 0}, {0, 1}}};
+    std::vector<std::unordered_set<TileData, TileDataHash>> sets(2);
+    for (int i = 0; i < directions.size(); ++i) {
+        auto const& dir = directions[i];
         auto curr_pos = pos;
-        while (!emptyTile(curr_pos + dir.first)) curr_pos += dir.first;
+        while (!emptyTile(curr_pos - dir)) curr_pos -= dir;
+        if (curr_pos == pos) curr_pos += dir;
         State state = START;
-        while (!emptyTile(curr_pos) || curr_pos == pos) {
-            if (curr_pos == pos) {
-                curr_pos += dir.second;
-                continue;
-            }
-            isNotIsolated = true;
+        while (!emptyTile(curr_pos)) {
             auto const& curr_tile = map.at(curr_pos);
             if (curr_tile == tile) return false;
             switch (state) {
@@ -102,10 +88,14 @@ bool Controller::isMoveLegit(TileData const& tile, sf::Vector2i const& pos) cons
                 case COLOR_LINE:if (curr_tile.color != tile.color) return false;
                     break;
             }
-            curr_pos += dir.second;
+            auto emplaced = sets[i].emplace(curr_tile);
+            if (!emplaced.second) return false; // cette tuile existe déjà dans la ligne / colonne
+
+            curr_pos += dir;
+            if (curr_pos == pos) curr_pos += dir;
         }
     }
-    return isNotIsolated;
+    return true;
 }
 
 bool Controller::isMoveLegit(Tile const& tile, sf::Vector2i const& pos) const {
@@ -115,6 +105,9 @@ bool Controller::isMoveLegit(Tile const& tile, sf::Vector2i const& pos) const {
 unsigned int Controller::score(std::vector<TileDataWithCoord> const& moves) const {
     // les moves doivent déjà être dans la carte logique
 
+
+    // tout premier coup
+    if (map.size() == 1 && moves.size() == 1 && map.find(moves.front().coord) != map.end()) return 1;
 
     /* 0 : left
      * 1 : right
@@ -133,7 +126,7 @@ unsigned int Controller::score(std::vector<TileDataWithCoord> const& moves) cons
             while (!emptyTile(sf::Vector2i{min_x, move.y} + dirs[0])) min_x--;
             auto max_x = move.x;
             while (!emptyTile(sf::Vector2i{max_x, move.y} + dirs[1])) max_x++;
-            if (min_x != max_x || (moves.size() == 1 && min_x == max_x)) {
+            if (min_x != max_x) {
                 unsigned int qwirkle_count = 0;
                 for (int x = min_x; x <= max_x; ++x) {
                     if (horizontal.find({x, move.y}) == horizontal.end()) {

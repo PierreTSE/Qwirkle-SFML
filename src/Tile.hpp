@@ -21,6 +21,12 @@ struct TileData {
     TileColor color;
 };
 
+struct TileDataHash {
+    auto operator()(TileData const& v) const noexcept {
+        return std::hash<decltype(v.shapeID)>{}(v.shapeID) ^ (std::hash<decltype(v.color)>{}(v.color) << 1);
+    }
+};
+
 struct TileDataWithCoord : TileData {
     TileDataWithCoord() = default;
     explicit TileDataWithCoord(Tile const& tile);
