@@ -40,7 +40,7 @@ sf::Color type2color(TileColor type) {
             case Green:return {17, 119, 51};
             case Blue:return {68, 170, 153};
             case Purple:return {51, 34, 136};
-            case Orange:return {204, 124, 0};
+            case Orange:return {204, 102, 119};
             case Yellow:return {221, 204, 119};
             case White:return {136, 204, 238};
             case Pink:return {170, 68, 153};
