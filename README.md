@@ -35,3 +35,5 @@ Select the number of players and computer using the arrow keys, and hit Start to
 
 You can change configuration parameters in the file ./rc/config.txt . \
 You can add a locale by copying and updating the file ./rc/locales/default.txt, and writing its new name in the config file.
+
+Notably, you can enable the **colorblind mode** by adding "colorblind = btrue" in this file.
