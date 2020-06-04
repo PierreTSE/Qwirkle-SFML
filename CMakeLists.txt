@@ -11,10 +11,9 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif ()
 
 
-set(ENGINE_DIRECTORY "D:/_Programmation/__Mes jeux/_Schmoutse Engine/include")
-file(GLOB_RECURSE SOURCE_FILES src/* ${ENGINE_DIRECTORY}/*)
+file(GLOB_RECURSE SOURCE_FILES src/*)
 add_executable(${EXECUTABLE_NAME} ${SOURCE_FILES} ico.o)
-target_include_directories(${EXECUTABLE_NAME} PUBLIC ${ENGINE_DIRECTORY})
+target_include_directories(${EXECUTABLE_NAME} PUBLIC src/Engine)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     set(EXECUTABLE_OUTPUT_PATH ${CMAKE_HOME_DIRECTORY})
