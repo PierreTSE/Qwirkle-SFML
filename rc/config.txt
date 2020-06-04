@@ -1,5 +1,5 @@
 # name of the locale file (whithout extension)
-locale = sFR
+# locale = sFR
 # show legal places when selecting a tile
 forceHints = bfalse
 # show rack of AI during their turn
