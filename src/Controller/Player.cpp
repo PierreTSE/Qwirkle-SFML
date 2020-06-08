@@ -1,4 +1,5 @@
 #include "Player.hpp"
+#include <array>
 #include <iostream>
 
 Player::Player(std::wstring name, Controller& controller, sf::Vector2u const& windowSize) :

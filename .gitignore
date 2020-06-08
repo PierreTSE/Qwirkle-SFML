@@ -8,3 +8,11 @@ bin
 *.rc
 *.ico
 *.7z
+
+# visual studio
+.vs
+out
+*.sln
+*.vcx*
+Debug
+Release

@@ -1,7 +1,8 @@
 #include "Localisator.hpp"
 #include "RessourceLoader.hpp"
-#include <Settings.hpp>
+#include "Settings.hpp"
 #include "Utilities.hpp"
+#include <codecvt>
 #include <fstream>
 
 Localisator::Localisator() {
@@ -43,5 +44,3 @@ std::wstring Localisator::get(const std::string& key) {
 std::string Localisator::getLocaleName() {
     return instance().localeName;
 }
-
-

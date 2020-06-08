@@ -2,6 +2,7 @@
 #define QWIRKLE_CONTROLLER_HPP
 
 #include "Tile.hpp"
+#include <unordered_map>
 #include <vector>
 
 
