@@ -28,9 +28,12 @@ TitleScreen::TitleScreen(sf::RenderWindow& window) : Screen(window) {
     startText.setString(Localisator::get("Start"));
     centerOrigin(startText);
 
-    cursor.setPointCount(3);
-    cursor.setRadius(10);
-    centerOrigin(cursor);
+    leftCursor.setPointCount(3);
+    leftCursor.setRadius(10);
+    centerOrigin(leftCursor);
+    rightCursor = leftCursor;
+    leftCursor.setRotation(-90);
+    rightCursor.setRotation(90);
 
     adapt_viewport(window_);
 }
@@ -54,36 +57,35 @@ std::unique_ptr<Screen> TitleScreen::execute() {
             switch (event.type) {
                 case sf::Event::KeyPressed: {
                     switch (event.key.code) {
-                        case sf::Keyboard::Up: if (cursorPos > 0) cursorPos -= 1;
+                        case sf::Keyboard::Up:
+                            if (cursorPos > 0) cursorPos -= 1;
+                            else cursorPos = 3;
                             break;
-                        case sf::Keyboard::Down: if (cursorPos < 2) cursorPos += 1;
+                        case sf::Keyboard::Down:
+                            if (cursorPos < 2) cursorPos += 1;
+                            else cursorPos = 0;
                             break;
-                        case sf::Keyboard::Right:
-                            if (cursorPos == 0 && players < 4) {
-                                players += 1;
-                                ai = std::min(ai, 4 - players);
-                            } else if (cursorPos == 1 && ai < 4) {
-                                ai += 1;
-                                players = std::min(players, 4 - ai);
-                            }
+                        case sf::Keyboard::Right:addParticipant();
                             break;
-                        case sf::Keyboard::Left:
-                            if (cursorPos == 0 && players > 0) players -= 1;
-                            else if (cursorPos == 1 && ai > 0) ai -= 1;
+                        case sf::Keyboard::Left:removeParticipant();
                             break;
-                        case sf::Keyboard::Enter:
-                            if (cursorPos == 2 && players + ai > 0) {
-                                std::vector<PlayerType> v;
-                                for (size_t i = 0; i < players; ++i) v.emplace_back(HUMAN);
-                                for (size_t i = 0; i < ai; ++i) v.emplace_back(AI);
-                                std::shuffle(v.begin(), v.end(), RandomEngine::instance());
-                                return std::unique_ptr<Screen>(new GameScreen(window_, v));
-                            }
+                        case sf::Keyboard::Enter:if (auto gamescreen = switchToGameScreen()) return gamescreen;
                             break;
                     }
-                    setPlayerText();
-                    setAiText();
                 }
+                    break;
+                case sf::Event::MouseButtonPressed : {
+                    const auto posint = sf::Mouse::getPosition(window_);
+                    const sf::Vector2f pos = {static_cast<float>(posint.x), static_cast<float>(posint.y)};
+                    if (playerText.getGlobalBounds().contains(pos)) cursorPos = 0;
+                    else if (aiText.getGlobalBounds().contains(pos)) cursorPos = 1;
+                    else if (startText.getGlobalBounds().contains(pos)) {
+                        if (cursorPos == 2) { if (auto gamescreen = switchToGameScreen()) return gamescreen; }
+                        else cursorPos = 2;
+                    } else if (leftCursor.getGlobalBounds().contains(pos)) removeParticipant();
+                    else if (rightCursor.getGlobalBounds().contains(pos)) addParticipant();
+                }
+                    break;
             }
         }
 
@@ -114,34 +116,62 @@ void TitleScreen::setAiText() {
 void TitleScreen::updateAndDrawCursor() {
     switch (cursorPos) {
         case 0:
-            cursor.setPosition(
-                    playerText.getPosition() + sf::Vector2f{-(playerText.getGlobalBounds().width / 2 + cursor.getGlobalBounds().width), 9});
+            leftCursor.setPosition(
+                    playerText.getPosition() + sf::Vector2f{-(playerText.getGlobalBounds().width / 2 + leftCursor.getGlobalBounds().width), 9});
             break;
         case 1:
-            cursor.setPosition(
-                    aiText.getPosition() + sf::Vector2f{-(aiText.getGlobalBounds().width / 2 + cursor.getGlobalBounds().width), 7});
+            leftCursor.setPosition(
+                    aiText.getPosition() + sf::Vector2f{-(aiText.getGlobalBounds().width / 2 + leftCursor.getGlobalBounds().width), 7});
             break;
         case 2:
-            cursor.setPosition(
-                    startText.getPosition() + sf::Vector2f{-(startText.getGlobalBounds().width / 2 + cursor.getGlobalBounds().width), 10});
+            leftCursor.setPosition(
+                    startText.getPosition() + sf::Vector2f{-(startText.getGlobalBounds().width / 2 + leftCursor.getGlobalBounds().width), 10});
             break;
     }
-    cursor.setRotation(-90);
-    window_.draw(cursor);
+    window_.draw(leftCursor);
     switch (cursorPos) {
         case 0:
-            cursor.setPosition(
-                    playerText.getPosition() + sf::Vector2f{playerText.getGlobalBounds().width / 2 + cursor.getGlobalBounds().width, 7});
+            rightCursor.setPosition(
+                    playerText.getPosition() + sf::Vector2f{playerText.getGlobalBounds().width / 2 + rightCursor.getGlobalBounds().width, 5});
             break;
         case 1:
-            cursor.setPosition(
-                    aiText.getPosition() + sf::Vector2f{aiText.getGlobalBounds().width / 2 + cursor.getGlobalBounds().width, 5});
+            rightCursor.setPosition(
+                    aiText.getPosition() + sf::Vector2f{aiText.getGlobalBounds().width / 2 + rightCursor.getGlobalBounds().width, 5});
             break;
         case 2:
-            cursor.setPosition(
-                    startText.getPosition() + sf::Vector2f{startText.getGlobalBounds().width / 2 + cursor.getGlobalBounds().width, 8});
+            rightCursor.setPosition(
+                    startText.getPosition() + sf::Vector2f{startText.getGlobalBounds().width / 2 + rightCursor.getGlobalBounds().width, 8});
             break;
     }
-    cursor.setRotation(90);
-    window_.draw(cursor);
+    window_.draw(rightCursor);
+}
+
+void TitleScreen::addParticipant() {
+    if (cursorPos == 0 && players < 4) {
+        players += 1;
+        ai = std::min(ai, 4 - players);
+    } else if (cursorPos == 1 && ai < 4) {
+        ai += 1;
+        players = std::min(players, 4 - ai);
+    }
+    setPlayerText();
+    setAiText();
+}
+
+void TitleScreen::removeParticipant() {
+    if (cursorPos == 0 && players > 0) players -= 1;
+    else if (cursorPos == 1 && ai > 0) ai -= 1;
+    setPlayerText();
+    setAiText();
+}
+
+std::unique_ptr<Screen> TitleScreen::switchToGameScreen() {
+    if (cursorPos == 2 && players + ai > 0) {
+        std::vector<PlayerType> v;
+        for (size_t i = 0; i < players; ++i) v.emplace_back(HUMAN);
+        for (size_t i = 0; i < ai; ++i) v.emplace_back(AI);
+        std::shuffle(v.begin(), v.end(), RandomEngine::instance());
+        return std::unique_ptr<Screen>(new GameScreen(window_, v));
+    }
+    return nullptr;
 }

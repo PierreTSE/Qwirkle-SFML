@@ -17,13 +17,18 @@ private:
     sf::Text playerText;
     sf::Text aiText;
     sf::Text startText;
-    sf::CircleShape cursor;
+    sf::CircleShape leftCursor;
+    sf::CircleShape rightCursor;
 
     unsigned players = 0, ai = 0, cursorPos = 0;
 
     void setPlayerText();
     void setAiText();
     void updateAndDrawCursor();
+
+    void addParticipant();
+    void removeParticipant();
+    std::unique_ptr<Screen> switchToGameScreen();
 };
 
 
