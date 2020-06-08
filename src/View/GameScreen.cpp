@@ -66,19 +66,17 @@ std::unique_ptr<Screen> GameScreen::execute() {
 
             switch (event.type) {
                 case sf::Event::MouseMoved: {
-                    if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                    if (selectedTile) {
+                        selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
+                    } else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                         grid.move(static_cast<float>(event.mouseMove.x - mouseLastPos.x),
                                   static_cast<float>(event.mouseMove.y - mouseLastPos.y));
                         grid.updateTilesPositions();
                     }
-                    if (selectedTile) {
-                        selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
-                    }
                     mouseLastPos = {event.mouseMove.x, event.mouseMove.y};
-                    // std::cout << event.mouseMove.x << " " << event.mouseMove.y << std::endl;
                 }
                     break;
-                case sf::Event::MouseButtonReleased: {
+                case sf::Event::MouseButtonPressed: {
                     if (ai) break;
                     switch (event.mouseButton.button) {
                         case sf::Mouse::Left: {

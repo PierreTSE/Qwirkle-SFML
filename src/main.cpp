@@ -6,7 +6,7 @@
 int main(int argc, char** argv) {
     for (int i = 1; i < argc; ++i) {
         if (auto arg = std::string(argv[i]); arg == "--version" || arg == "-V") {
-            std::cout << "Version 1.1.1" << std::endl;
+            std::cout << "Version 1.1.2" << std::endl;
             std::exit(EXIT_SUCCESS);
         }
     }
