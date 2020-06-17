@@ -1,17 +1,13 @@
 #ifndef QWIRKLE_GAMESCREEN_HPP
 #define QWIRKLE_GAMESCREEN_HPP
 
-#include "../Controller/Controller.hpp"
-#include "../Controller/Player.hpp"
-#include "../UI/Ui.hpp"
-#include "Grid.hpp"
-#include "Screen.hpp"
+#include "Controller/Controller.hpp"
+#include "Controller/Player.hpp"
+#include "Engine/Screen.hpp"
+#include "UI/Ui.hpp"
+#include "View/Grid.hpp"
 #include <utility>
 
-
-enum PlayerType {
-    HUMAN, AI
-};
 
 class GameScreen : public Screen {
 public:
@@ -47,8 +43,6 @@ private:
     sf::Time waitAfterAiTurnTime = sf::milliseconds(100000);
     sf::Time waitedAfterAiTurnTime = sf::Time::Zero;
 
-    const sf::Color bgColor = {53, 101, 77};
-    sf::RectangleShape bg;
     Ui ui;
     sf::Text text;
 

@@ -1,6 +1,6 @@
-#include "Ui.hpp"
-#include "RessourceLoader.hpp"
-#include "Utilities.hpp"
+#include "Engine/RessourceLoader.hpp"
+#include "Engine/Utilities.hpp"
+#include "UI/Ui.hpp"
 
 Ui::Ui() {
     setSize({10 + 40 + 5 + 40 + 10, 5 + 40 + 5});

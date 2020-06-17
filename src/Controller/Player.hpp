@@ -1,10 +1,19 @@
 #ifndef QWIRKLE_PLAYER_HPP
 #define QWIRKLE_PLAYER_HPP
 
-#include "Controller.hpp"
-#include "../View/Grid.hpp"
+#include "Controller/Controller.hpp"
+#include "View/Grid.hpp"
+
+enum PlayerType {
+    HUMAN, AI
+};
+
+enum class ClientType {
+    Host, Client, Ai
+};
 
 struct Player {
+    Player();
     Player(std::wstring name, Controller& controller, sf::Vector2u const& windowSize);
 
     void replaceRack(sf::Vector2u const& windowSize);
@@ -21,10 +30,11 @@ struct Player {
     Grid rack;
     std::vector<std::pair<size_t, Tile>> moves; // pair<x-coord sur le rack, pièce jouée>
 
-    uint32_t score = 0;
+    uint16_t score = 0;
 
     std::wstring name;
 
+    virtual ClientType type() const;
 private:
     bool isAdjacentToSomeMove(sf::Vector2i const& coords) const;
 };

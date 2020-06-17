@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 
-enum TileColor {
+enum TileColor : uint8_t {
     Red, Green, Blue, Purple, Orange, Yellow, White, Pink
 };
 
@@ -13,11 +13,11 @@ struct Tile;
 
 struct TileData {
     TileData() = default;
-    TileData(unsigned char shapeID, TileColor color);
+    TileData(uint8_t shapeID, TileColor color);
     explicit TileData(Tile const&);
     bool operator==(const TileData& rhs) const;
     bool operator!=(const TileData& rhs) const;
-    unsigned char shapeID;
+    uint8_t shapeID;
     TileColor color;
 };
 
@@ -37,8 +37,8 @@ struct TileDataWithCoord : TileData {
 };
 
 struct Tile : public sf::Sprite {
-    Tile(unsigned char shapeID, TileColor color);
-
+    Tile(uint8_t shapeID, TileColor color);
+    Tile(TileData const& rhs);
     Tile(TileDataWithCoord const& rhs);
 
     bool operator==(const Tile& rhs) const;
@@ -47,7 +47,7 @@ struct Tile : public sf::Sprite {
 
     bool operator<(const Tile& rhs) const;
 
-    unsigned char shapeID;
+    uint8_t shapeID;
     TileColor color;
 
     sf::Vector2i coord;

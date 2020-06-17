@@ -1,8 +1,11 @@
-#include "Screen.hpp"
-#include "constantes.hpp"
+#include "Engine/Screen.hpp"
 
 
-Screen::Screen(sf::RenderWindow& window) : window_{window} {}
+Screen::Screen(sf::RenderWindow& window) : window_{window} {
+    bg_.setSize({static_cast<float>(window_.getSize().x), static_cast<float>(window_.getSize().y)});
+    const sf::Color bgColor = {53, 101, 77};
+    bg_.setFillColor(bgColor);
+}
 
 std::optional<std::unique_ptr<Screen>> Screen::manageEvent(const sf::Event& event) {
     if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Delete))
@@ -15,21 +18,7 @@ std::optional<std::unique_ptr<Screen>> Screen::manageEvent(const sf::Event& even
     return std::nullopt;
 }
 
-
 void Screen::adapt_viewport(sf::RenderWindow& window) {
-    auto view = window.getView();
-    auto size = window.getSize();
-
-    float ratio = (float) size.x / size.y;
-    float wanted_ratio = (float) WINDOW_SIZE_X / WINDOW_SIZE_Y;
-
-    if (ratio > wanted_ratio) {
-        float proportion = wanted_ratio / ratio;
-        view.setViewport({(1 - proportion) / 2, 0, proportion, 1});
-    } else {
-        float proportion = ratio / wanted_ratio;
-        view.setViewport({0, (1 - proportion) / 2, 1, proportion});
-    }
-
-    window.setView(view);
+    window_.setView(sf::View(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y)));
+    bg_.setSize({static_cast<float>(window_.getSize().x), static_cast<float>(window_.getSize().y)});
 }

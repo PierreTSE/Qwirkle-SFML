@@ -1,18 +1,20 @@
-#include "Controller.hpp"
-#include "Utilities.hpp"
+#include "Controller/Controller.hpp"
+#include "Engine/Utilities.hpp"
 #include <array>
 #include <unordered_set>
 
-Controller::Controller() {
-    reserve.reserve(6 * 6 * 3);
-    for (size_t i = 0; i < 6; ++i) {
-        for (size_t j = 0; j < 6; ++j) {
-            for (size_t k = 0; k < 3; ++k) {
-                reserve.emplace_back(i, (TileColor) j);
+Controller::Controller(bool fillReserve) {
+    if (fillReserve) {
+        reserve.reserve(6 * 6 * 3);
+        for (size_t i = 0; i < 6; ++i) {
+            for (size_t j = 0; j < 6; ++j) {
+                for (size_t k = 0; k < 3; ++k) {
+                    reserve.emplace_back(i, (TileColor) j);
+                }
             }
         }
+        random_shuffle();
     }
-    random_shuffle();
 }
 
 void Controller::random_shuffle() {
@@ -24,7 +26,7 @@ std::vector<Tile> Controller::retrieveTilesFromReserve(size_t n) {
     if (reserve.size() > n) {
         tiles.insert(tiles.end(), std::make_move_iterator(reserve.end() - n), std::make_move_iterator(reserve.end()));
         reserve.erase(reserve.end() - n, reserve.end());
-    } else {
+    } else if (!reserve.empty()) {
         tiles.insert(tiles.end(), std::make_move_iterator(reserve.begin()), std::make_move_iterator(reserve.end()));
         reserve.clear();
     }
@@ -69,7 +71,7 @@ bool Controller::isMoveLegit(TileData const& tile, sf::Vector2i const& pos) cons
     };
     const std::array<sf::Vector2i, 2> directions = {{{1, 0}, {0, 1}}};
     std::vector<std::unordered_set<TileData, TileDataHash>> sets(2);
-    for (int i = 0; i < directions.size(); ++i) {
+    for (size_t i = 0; i < directions.size(); ++i) {
         auto const& dir = directions[i];
         auto curr_pos = pos;
         while (!emptyTile(curr_pos - dir)) curr_pos -= dir;
@@ -84,9 +86,11 @@ bool Controller::isMoveLegit(TileData const& tile, sf::Vector2i const& pos) cons
                     else if (curr_tile.shapeID == tile.shapeID) state = SHAPE_LINE;
                     else return false;
                     break;
-                case SHAPE_LINE:if (curr_tile.shapeID != tile.shapeID) return false;
+                case SHAPE_LINE:
+                    if (curr_tile.shapeID != tile.shapeID) return false;
                     break;
-                case COLOR_LINE:if (curr_tile.color != tile.color) return false;
+                case COLOR_LINE:
+                    if (curr_tile.color != tile.color) return false;
                     break;
             }
             auto emplaced = sets[i].emplace(curr_tile);

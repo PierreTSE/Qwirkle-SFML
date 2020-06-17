@@ -1,7 +1,7 @@
 #ifndef GRID_HPP
 #define GRID_HPP
 
-#include "../Controller/Tile.hpp"
+#include "Controller/Tile.hpp"
 #include <SFML/Graphics.hpp>
 
 /**

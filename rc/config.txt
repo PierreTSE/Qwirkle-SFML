@@ -1,3 +1,5 @@
+#### Solo
+
 # name of the locale file (whithout extension)
 #locale = sFR
 
@@ -10,3 +12,11 @@ forceHints = bfalse
 showAiRack = bfalse
 # time in ms to wait after an AI has played
 waitAfterAiTurnTime = i0
+
+#### Online
+
+# your name as it will appear in the game
+#name = sMyName
+
+#preferredHostIP = s127.0.0.1
+onlinePort = i50001

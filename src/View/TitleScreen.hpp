@@ -1,7 +1,7 @@
 #ifndef QWIRKLE_SFML_TITLESCREEN_HPP
 #define QWIRKLE_SFML_TITLESCREEN_HPP
 
-#include "Screen.hpp"
+#include "Engine/Screen.hpp"
 
 class TitleScreen : public Screen {
 public:
@@ -11,16 +11,16 @@ public:
     std::unique_ptr<Screen> execute() override;
 
 private:
-    sf::RectangleShape bg;
     sf::Sprite qwirkle;
     sf::Text sfml;
     sf::Text playerText;
     sf::Text aiText;
     sf::Text startText;
+    sf::Text onlineGameText;
     sf::CircleShape leftCursor;
     sf::CircleShape rightCursor;
 
-    unsigned players = 0, ai = 0, cursorPos = 0;
+    unsigned int players = 0, ai = 0, cursorPos = 0;
 
     void setPlayerText();
     void setAiText();
@@ -29,6 +29,7 @@ private:
     void addParticipant();
     void removeParticipant();
     std::unique_ptr<Screen> switchToGameScreen();
+    std::unique_ptr<Screen> switchToLobbyScreen();
 };
 
 

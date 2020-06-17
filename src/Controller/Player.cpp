@@ -1,14 +1,18 @@
-#include "Player.hpp"
+#include "Controller/Player.hpp"
 #include <array>
 #include <iostream>
+
+Player::Player() : rack(40, 40, 1, 6, 5, sf::Color::White) {
+    rack.centerOrigin();
+}
 
 Player::Player(std::wstring name, Controller& controller, sf::Vector2u const& windowSize) :
         rack(40, 40, 1, 6, 5, sf::Color::White),
         name{std::move(name)} {
     rack.centerOrigin();
     refillRack(6, controller);
-    replaceRack(windowSize);
     rack.scale(0.999, 0.999); // hack pour forcer l'activation de l'AA
+    replaceRack(windowSize);
 }
 
 void Player::draw(sf::RenderWindow& window) const {
@@ -120,4 +124,8 @@ bool Player::canPlay(Controller const& controller) const {
         if (!positions.empty()) return true;
     }
     return false;
+}
+
+ClientType Player::type() const {
+    return ClientType::Host;
 }

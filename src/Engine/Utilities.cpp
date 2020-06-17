@@ -1,5 +1,4 @@
-#include "Utilities.hpp"
-#include "constantes.hpp"
+#include "Engine/Utilities.hpp"
 #include <random>
 
 std::mt19937_64& RandomEngine::instance() {
@@ -17,12 +16,6 @@ sf::Vector2f normalize(const sf::Vector2f& source) {
         return sf::Vector2f(source.x / length, source.y / length);
     else
         return source;
-}
-
-void fit(sf::Sprite& s) {
-    const float ratio = std::max(s.getTexture()->getSize().x / static_cast<double>(WINDOW_SIZE_X),
-                                 s.getTexture()->getSize().y / static_cast<double>(WINDOW_SIZE_Y));
-    s.setScale(1.f / ratio, 1.f / ratio);
 }
 
 int random(int min, int max) {

@@ -1,31 +1,50 @@
 #include "EndScreen.hpp"
-#include "Localisator.hpp"
-#include "RessourceLoader.hpp"
-#include "Utilities.hpp"
+#include "Engine/alphanum.hpp"
+#include "Engine/Localisator.hpp"
+#include "Engine/RessourceLoader.hpp"
+#include "Engine/Utilities.hpp"
 
-EndScreen::EndScreen(sf::RenderWindow& window, std::vector<std::unique_ptr<Player>> players, Grid grid) :
-        Screen(window),
-        players{std::move(players)},
-        grid{std::move(grid)} {
-    bg.setSize({static_cast<float>(window_.getSize().x), static_cast<float>(window_.getSize().y)});
-    bg.setFillColor({53, 101, 77});
+void EndScreen::construct() {
+    std::sort(scores.begin(), scores.end(),
+              [](auto const& a, auto const& b) {
+                  return (a.second != b.second ? a.second > b.second : alphanum_less<decltype(a.first)>{}(a.first, b.first));
+              });
+
+    // retire les marqueurs de coup
+    grid.tiles.erase(std::remove_if(grid.tiles.begin(), grid.tiles.end(),
+                                    [](auto const& e) { return e.shapeID == 6; }), grid.tiles.end());
 
     text.setFont(RessourceLoader::getFont("fonts/Ubuntu-R.ttf"));
     text.setCharacterSize(30);
     gameEnded.setFont(RessourceLoader::getFont("fonts/Ubuntu-R.ttf"));
     gameEnded.setCharacterSize(60);
     gameEnded.setString(Localisator::get("Game ended"));
-    gameEnded.setPosition(static_cast<float>(window_.getSize().x) / 2, 300);
+    gameEnded.setPosition(static_cast<float>(window_.getSize().x) / 2, 100);
     centerOrigin(gameEnded);
 
     mouseLastPos = sf::Mouse::getPosition();
     grid.setScale(0.999, 0.999);
 }
 
+EndScreen::EndScreen(sf::RenderWindow& window, std::vector<std::unique_ptr<Player>> const& players, Grid grid) :
+        Screen(window),
+        grid{std::move(grid)} {
+
+    for (auto const& player : players) scores.emplace_back(player->name, player->score);
+
+    construct();
+}
+
+EndScreen::EndScreen(sf::RenderWindow& window, std::vector<std::pair<std::wstring, uint16_t>> scores, Grid grid) :
+        Screen{window},
+        scores{std::move(scores)},
+        grid{std::move(grid)} {
+    construct();
+}
+
 void EndScreen::adapt_viewport(sf::RenderWindow& window) {
-    window.setView(sf::View(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y)));
-    bg.setSize({static_cast<float>(window_.getSize().x), static_cast<float>(window_.getSize().y)});
-    gameEnded.setPosition(static_cast<float>(window_.getSize().x) / 2, 300);
+    Screen::adapt_viewport(window);
+    gameEnded.setPosition(static_cast<float>(window_.getSize().x) / 2, gameEnded.getPosition().y);
 }
 
 std::unique_ptr<Screen> EndScreen::execute() {
@@ -42,7 +61,8 @@ std::unique_ptr<Screen> EndScreen::execute() {
                         }
                             break;
                         case sf::Keyboard::Enter:
-                        case sf::Keyboard::Escape:return nullptr;
+                        case sf::Keyboard::Escape:
+                            return nullptr;
                     }
                 }
                     break;
@@ -66,18 +86,18 @@ std::unique_ptr<Screen> EndScreen::execute() {
         }
 
         window_.clear();
-        window_.draw(bg);
+        window_.draw(bg_);
         grid.draw(window_);
         window_.draw(gameEnded);
         text.setString(Localisator::get("Scores"));
-        text.setPosition(static_cast<float>(window_.getSize().x) / 2, 400);
+        text.setPosition(static_cast<float>(window_.getSize().x) / 2, gameEnded.getPosition().y + 100);
         text.setStyle(sf::Text::Style::Underlined);
         centerOrigin(text);
         window_.draw(text);
         text.setStyle(sf::Text::Style::Regular);
-        for (size_t i = 0; i < players.size(); ++i) {
-            text.setString(players.at(i)->name + L" : " + std::to_wstring(players.at(i)->score));
-            text.setPosition(static_cast<float>(window_.getSize().x) / 2, 450 + 50 * i);
+        for (size_t i = 0; i < scores.size(); ++i) {
+            text.setString(scores.at(i).first + L" : " + std::to_wstring(scores.at(i).second));
+            text.setPosition(static_cast<float>(window_.getSize().x) / 2, gameEnded.getPosition().y + 150 + 50 * i);
             centerOrigin(text);
             window_.draw(text);
         }

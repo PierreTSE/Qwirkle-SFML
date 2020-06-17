@@ -16,3 +16,4 @@ out
 *.vcx*
 Debug
 Release
+CMakeSettings.json

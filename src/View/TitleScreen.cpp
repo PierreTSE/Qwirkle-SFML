@@ -1,13 +1,11 @@
-#include "TitleScreen.hpp"
-#include "GameScreen.hpp"
-#include "Localisator.hpp"
-#include "RessourceLoader.hpp"
-#include "Utilities.hpp"
+#include "Engine/Localisator.hpp"
+#include "Engine/RessourceLoader.hpp"
+#include "Engine/Utilities.hpp"
+#include "Online/Lobby/DefaultLobbyScreen.hpp"
+#include "View/GameScreen.hpp"
+#include "View/TitleScreen.hpp"
 
 TitleScreen::TitleScreen(sf::RenderWindow& window) : Screen(window) {
-    bg.setSize({static_cast<float>(window_.getSize().x), static_cast<float>(window_.getSize().y)});
-    bg.setFillColor({53, 101, 77});
-
     qwirkle.setTexture(RessourceLoader::getTexture("sprites/Qwirkle.png"));
     centerOrigin(qwirkle);
     qwirkle.setPosition(static_cast<float>(window_.getSize().x) / 2, qwirkle.getGlobalBounds().height);
@@ -25,8 +23,12 @@ TitleScreen::TitleScreen(sf::RenderWindow& window) : Screen(window) {
     setAiText();
     startText.setFont(RessourceLoader::getFont("fonts/Ubuntu-R.ttf"));
     startText.setCharacterSize(30);
-    startText.setString(Localisator::get("Start"));
+    startText.setString(Localisator::get("Start local game"));
     centerOrigin(startText);
+    onlineGameText.setFont(RessourceLoader::getFont("fonts/Ubuntu-R.ttf"));
+    onlineGameText.setCharacterSize(30);
+    onlineGameText.setString(Localisator::get("Online Game"));
+    centerOrigin(onlineGameText);
 
     leftCursor.setPointCount(3);
     leftCursor.setRadius(10);
@@ -35,17 +37,17 @@ TitleScreen::TitleScreen(sf::RenderWindow& window) : Screen(window) {
     leftCursor.setRotation(-90);
     rightCursor.setRotation(90);
 
-    adapt_viewport(window_);
+    TitleScreen::adapt_viewport(window_);
 }
 
 void TitleScreen::adapt_viewport(sf::RenderWindow& window) {
-    window.setView(sf::View(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y)));
-    bg.setSize({static_cast<float>(window_.getSize().x), static_cast<float>(window_.getSize().y)});
+    Screen::adapt_viewport(window);
     qwirkle.setPosition(static_cast<float>(window_.getSize().x) / 2, qwirkle.getGlobalBounds().height);
     sfml.setPosition(qwirkle.getPosition() + sf::Vector2f{0, qwirkle.getGlobalBounds().height / 2 + sfml.getGlobalBounds().height});
-    playerText.setPosition(sfml.getPosition() + sf::Vector2f{0, 200});
+    playerText.setPosition(sfml.getPosition() + sf::Vector2f{0, 150});
     aiText.setPosition(playerText.getPosition() + sf::Vector2f{0, 50});
     startText.setPosition(aiText.getPosition() + sf::Vector2f{0, 50});
+    onlineGameText.setPosition(startText.getPosition() + sf::Vector2f{0, 50});
 }
 
 std::unique_ptr<Screen> TitleScreen::execute() {
@@ -62,14 +64,18 @@ std::unique_ptr<Screen> TitleScreen::execute() {
                             else cursorPos = 3;
                             break;
                         case sf::Keyboard::Down:
-                            if (cursorPos < 2) cursorPos += 1;
+                            if (cursorPos < 3) cursorPos += 1;
                             else cursorPos = 0;
                             break;
-                        case sf::Keyboard::Right:addParticipant();
+                        case sf::Keyboard::Right:
+                            addParticipant();
                             break;
-                        case sf::Keyboard::Left:removeParticipant();
+                        case sf::Keyboard::Left:
+                            removeParticipant();
                             break;
-                        case sf::Keyboard::Enter:if (auto gamescreen = switchToGameScreen()) return gamescreen;
+                        case sf::Keyboard::Enter:
+                            if (auto nextscreen = switchToGameScreen()) return nextscreen;
+                            else if (auto nextscreen = switchToLobbyScreen()) return nextscreen;
                             break;
                     }
                 }
@@ -80,8 +86,11 @@ std::unique_ptr<Screen> TitleScreen::execute() {
                     if (playerText.getGlobalBounds().contains(pos)) cursorPos = 0;
                     else if (aiText.getGlobalBounds().contains(pos)) cursorPos = 1;
                     else if (startText.getGlobalBounds().contains(pos)) {
-                        if (cursorPos == 2) { if (auto gamescreen = switchToGameScreen()) return gamescreen; }
+                        if (cursorPos == 2) { if (auto nextscreen = switchToGameScreen()) return nextscreen; }
                         else cursorPos = 2;
+                    } else if (onlineGameText.getGlobalBounds().contains(pos)) {
+                        if (cursorPos == 3) { if (auto nextscreen = switchToLobbyScreen()) return nextscreen; }
+                        else cursorPos = 3;
                     } else if (leftCursor.getGlobalBounds().contains(pos)) removeParticipant();
                     else if (rightCursor.getGlobalBounds().contains(pos)) addParticipant();
                 }
@@ -90,12 +99,13 @@ std::unique_ptr<Screen> TitleScreen::execute() {
         }
 
         window_.clear();
-        window_.draw(bg);
+        window_.draw(bg_);
         window_.draw(qwirkle);
         window_.draw(sfml);
         window_.draw(playerText);
         window_.draw(aiText);
         window_.draw(startText);
+        window_.draw(onlineGameText);
         updateAndDrawCursor();
         window_.display();
         sf::sleep(sf::milliseconds(100));
@@ -127,6 +137,11 @@ void TitleScreen::updateAndDrawCursor() {
             leftCursor.setPosition(
                     startText.getPosition() + sf::Vector2f{-(startText.getGlobalBounds().width / 2 + leftCursor.getGlobalBounds().width), 10});
             break;
+        case 3:
+            leftCursor.setPosition(
+                    onlineGameText.getPosition() +
+                    sf::Vector2f{-(onlineGameText.getGlobalBounds().width / 2 + leftCursor.getGlobalBounds().width), 10});
+            break;
     }
     window_.draw(leftCursor);
     switch (cursorPos) {
@@ -141,6 +156,10 @@ void TitleScreen::updateAndDrawCursor() {
         case 2:
             rightCursor.setPosition(
                     startText.getPosition() + sf::Vector2f{startText.getGlobalBounds().width / 2 + rightCursor.getGlobalBounds().width, 8});
+            break;
+        case 3:
+            rightCursor.setPosition(
+                    onlineGameText.getPosition() + sf::Vector2f{onlineGameText.getGlobalBounds().width / 2 + rightCursor.getGlobalBounds().width, 8});
             break;
     }
     window_.draw(rightCursor);
@@ -171,7 +190,14 @@ std::unique_ptr<Screen> TitleScreen::switchToGameScreen() {
         for (size_t i = 0; i < players; ++i) v.emplace_back(HUMAN);
         for (size_t i = 0; i < ai; ++i) v.emplace_back(AI);
         std::shuffle(v.begin(), v.end(), RandomEngine::instance());
-        return std::unique_ptr<Screen>(new GameScreen(window_, v));
+        return std::make_unique<GameScreen>(window_, v);
+    }
+    return nullptr;
+}
+
+std::unique_ptr<Screen> TitleScreen::switchToLobbyScreen() {
+    if (cursorPos == 3) {
+        return std::make_unique<DefaultLobbyScreen>(window_);
     }
     return nullptr;
 }

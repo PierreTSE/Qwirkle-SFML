@@ -1,6 +1,10 @@
-#include "Ai.hpp"
+#include "Controller/Ai.hpp"
 #include <iostream>
 #include <chrono>
+
+Ai::Ai(std::wstring name) {
+    Player::name = std::move(name);
+}
 
 Ai::Ai(std::wstring name, Controller& controller, sf::Vector2u const& windowSize) : Player(std::move(name), controller, windowSize) {}
 
@@ -118,4 +122,8 @@ void Ai::recycle(Controller& controller) {
     rack.tiles.clear();
     refillRack(toRefill, controller);
     rack.updateTilesPositions();
+}
+
+ClientType Ai::type() const {
+    return ClientType::Ai;
 }

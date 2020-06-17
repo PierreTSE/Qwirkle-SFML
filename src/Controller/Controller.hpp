@@ -1,7 +1,7 @@
 #ifndef QWIRKLE_CONTROLLER_HPP
 #define QWIRKLE_CONTROLLER_HPP
 
-#include "Tile.hpp"
+#include "Controller/Tile.hpp"
 #include <unordered_map>
 #include <vector>
 
@@ -16,7 +16,7 @@ struct Vector2Hash {
 };
 
 struct Controller {
-    Controller();
+    explicit Controller(bool fillReserve = true);
 
     // tile management
     std::vector<Tile> retrieveTilesFromReserve(size_t n);

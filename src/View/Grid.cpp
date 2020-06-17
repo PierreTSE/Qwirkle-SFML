@@ -1,4 +1,4 @@
-#include "Grid.hpp"
+#include "View/Grid.hpp"
 
 Grid::Grid(float tileWidth, float tileHeight, unsigned int lineNumber, unsigned int colNumber, float lineThickness)
         : tileWidth_(tileWidth),
@@ -88,14 +88,12 @@ void Grid::scale(float fx, float fy) {
 }
 
 void Grid::updateTilesPositions() {
-    for (auto& tile : tiles) {
-        tile.setScale(getScale());
-    }
     const float x = (lineThickness_ + tileWidth_) * getScale().x;
     const float y = (lineThickness_ + tileHeight_) * getScale().y;
     const float offsetx = x / 2 + getPosition().x + getOrigin().x;
     const float offsety = y / 2 + getPosition().y + getOrigin().y;
     for (auto& tile : tiles) {
+        tile.setScale(getScale());
         tile.setPosition(tile.coord.x * x + offsetx, tile.coord.y * y + offsety);
     }
 }

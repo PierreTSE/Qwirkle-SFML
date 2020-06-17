@@ -9,7 +9,6 @@ template<typename T>
 void centerOrigin(T& t) { t.setOrigin(t.getLocalBounds().width / 2.0, t.getLocalBounds().height / 2.0); }
 
 sf::Vector2f normalize(const sf::Vector2f& source);
-void fit(sf::Sprite& s);
 
 sf::Color HSVtoRGB(int hue, float sat, float val, float alpha); // hue: 0-360°; sat: 0.f-1.f; val: 0.f-1.f
 

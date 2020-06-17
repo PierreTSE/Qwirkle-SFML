@@ -1,12 +1,12 @@
-#include "RessourceLoader.hpp"
-#include "View/GameScreen.hpp"
+#include "Engine/RessourceLoader.hpp"
 #include "View/TitleScreen.hpp"
 #include <iostream>
+
 
 int main(int argc, char** argv) {
     for (int i = 1; i < argc; ++i) {
         if (auto arg = std::string(argv[i]); arg == "--version" || arg == "-V") {
-            std::cout << "Version 1.1.3" << std::endl;
+            std::cout << "Qwirkle-SFML " << QWIRKLE_SFML_MAJOR << "." << QWIRKLE_SFML_MINOR << "." << QWIRKLE_SFML_PATCH << std::endl;
             std::exit(EXIT_SUCCESS);
         }
     }
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     window.setIcon(thumbnail.getSize().x, thumbnail.getSize().y, thumbnail.getPixelsPtr());
 
     // Title screen
-    std::unique_ptr<Screen> screen(new TitleScreen(window));
+    std::unique_ptr<Screen> screen = std::make_unique<TitleScreen>(window);
 
     while (screen) screen = screen->execute();
 }

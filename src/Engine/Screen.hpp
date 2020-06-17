@@ -16,6 +16,7 @@ public:
 
 protected:
     sf::RenderWindow& window_;
+    sf::RectangleShape bg_;
 
     virtual void adapt_viewport(sf::RenderWindow& window);
 };

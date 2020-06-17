@@ -1,11 +1,11 @@
-#include "GameScreen.hpp"
-#include "../Controller/Ai.hpp"
-#include "EndScreen.hpp"
-#include "GlobalClock.hpp"
-#include "Localisator.hpp"
-#include "RessourceLoader.hpp"
-#include "Settings.hpp"
-#include "Utilities.hpp"
+#include "Controller/Ai.hpp"
+#include "Engine/GlobalClock.hpp"
+#include "Engine/Localisator.hpp"
+#include "Engine/RessourceLoader.hpp"
+#include "Engine/Settings.hpp"
+#include "Engine/Utilities.hpp"
+#include "View/GameScreen.hpp"
+#include "View/EndScreen.hpp"
 #include <iostream>
 
 GameScreen::GameScreen(sf::RenderWindow& window, std::vector<PlayerType> const& playerTypes) :
@@ -22,9 +22,6 @@ GameScreen::GameScreen(sf::RenderWindow& window, std::vector<PlayerType> const& 
                                                                             window_.getSize()) :
                              std::make_unique<Ai>(Localisator::get("Computer") + L" " + std::to_wstring(++ai), controller, window_.getSize()));
     }
-
-    bg = sf::RectangleShape({static_cast<float>(window_.getSize().x), static_cast<float>(window_.getSize().y)});
-    bg.setFillColor(bgColor);
 
     mouseLastPos = sf::Mouse::getPosition();
 
@@ -44,8 +41,7 @@ GameScreen::GameScreen(sf::RenderWindow& window, std::vector<PlayerType> const& 
 }
 
 void GameScreen::adapt_viewport(sf::RenderWindow& window) {
-    window.setView(sf::View(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y)));
-    bg.setSize({static_cast<float>(window_.getSize().x), static_cast<float>(window_.getSize().y)});
+    Screen::adapt_viewport(window);
     for (auto& player : players) player->replaceRack(window.getSize());
     if (selectedTile) selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
     grid.updateTilesPositions();
@@ -161,9 +157,11 @@ std::unique_ptr<Screen> GameScreen::execute() {
                 case sf::Event::KeyPressed: {
                     if (ai) {
                         switch (event.key.code) {
-                            case sf::Keyboard::C:grid.centerIn(window_.getSize());
+                            case sf::Keyboard::C:
+                                grid.centerIn(window_.getSize());
                                 break;
-                            default:waitedAfterAiTurnTime = waitAfterAiTurnTime;
+                            default:
+                                waitedAfterAiTurnTime = waitAfterAiTurnTime;
                                 break;
                         }
                     } else {
@@ -250,7 +248,7 @@ std::unique_ptr<Screen> GameScreen::execute() {
 
 
         window_.clear();
-        window_.draw(bg);
+        window_.draw(bg_);
 
         grid.draw(window_);
 
@@ -344,10 +342,15 @@ void GameScreen::endTurnPlayer(bool forced) {
     // retire les coups des IA
     grid.tiles.erase(std::remove_if(grid.tiles.begin(), grid.tiles.end(),
                                     [](auto const& e) { return e.shapeID == 6; }), grid.tiles.end());
+    // vérifie la fin de jeu (le joueur a utilisé toutes ses tuiles)
+    if (controller.reserve.empty() && players.at(player_idx)->rack.tiles.empty()) {
+        endGame = true;
+        return;
+    }
     // passe la main
     player_idx++;
     player_idx %= players.size();
-    // vérifie la fin de jeu
+    // vérifie la fin de jeu (le joueur suivant ne peut plus jouer ou recycler)
     if (controller.reserve.empty() && !players.at(player_idx)->canPlay(controller))
         endGame = true;
 }
@@ -362,10 +365,15 @@ void GameScreen::endTurnAi() {
     ai->rack.updateTilesPositions();
     // reset les coups joués
     ai->moves.clear();
+    // vérifie la fin de jeu (le joueur a utilisé toutes ses tuiles)
+    if (controller.reserve.empty() && players.at(player_idx)->rack.tiles.empty()) {
+        endGame = true;
+        return;
+    }
     // passe la main
     player_idx++;
     player_idx %= players.size();
-    // vérifie la fin de jeu
+    // vérifie la fin de jeu (le joueur suivant ne peut plus jouer ou recycler)
     if (controller.reserve.empty() && !players.at(player_idx)->canPlay(controller))
         endGame = true;
 }
