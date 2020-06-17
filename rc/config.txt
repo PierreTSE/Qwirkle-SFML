@@ -15,8 +15,11 @@ waitAfterAiTurnTime = i0
 
 #### Online
 
-# your name as it will appear in the game
+# your name as it will appear in the game, you can still change it in game
 #name = sMyName
+
+# audio feedback when your turn starts
+playSoundOnTurnStart = btrue
 
 #preferredHostIP = s127.0.0.1
 onlinePort = i50001

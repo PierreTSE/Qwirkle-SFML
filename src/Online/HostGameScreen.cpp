@@ -36,7 +36,6 @@ HostGameScreen::HostGameScreen(sf::RenderWindow& window, std::vector<std::unique
                     } else {
                         if (p->type() == ClientType::Host) {
                             packet << static_cast<uint8_t>(0) << p->name;
-                            p->name += L'[' + Localisator::get("Host") + L']';
                         } else {
                             packet << static_cast<uint8_t>(1) << p->name;
                         }
@@ -56,6 +55,9 @@ HostGameScreen::HostGameScreen(sf::RenderWindow& window, std::vector<std::unique
                 break;
         }
     }
+    players.at(hostIndex)->name = players.at(hostIndex)->name +
+                                  (players.at(hostIndex)->name.empty() ? L"" : L" ") + L'[' + Localisator::get("Host") + L']';
+
     if (players.front()->type() == ClientType::Client) {
         sf::Packet packet;
         packet << GameCommand::Play;
@@ -186,6 +188,10 @@ std::unique_ptr<Screen> HostGameScreen::execute() {
                             break;
                         case sf::Keyboard::R: {
                             toggleRecycleMode();
+                        }
+                            break;
+                        case sf::Keyboard::T: {
+                            toggleMarkers();
                         }
                             break;
                         case sf::Keyboard::Num1: {
@@ -377,7 +383,12 @@ std::unique_ptr<Screen> HostGameScreen::execute() {
         for (size_t i = 0; i < players.size(); ++i) {
             text.setString(players.at(i)->name + L" : " + std::to_wstring(players.at(i)->score));
             text.setPosition(50, 70 + 50 * i);
-            if (i == player_idx) text.setStyle(sf::Text::Style::Bold);
+            if (i == player_idx) {
+                cursor.setPosition(text.getPosition().x - cursor.getGlobalBounds().width, text.getPosition().y + text.getGlobalBounds().height / 2);
+                window_.draw(cursor);
+                text.setStyle(sf::Text::Style::Bold);
+            }
+            window_.draw(text);
             window_.draw(text);
             if (i == player_idx) text.setStyle(sf::Text::Style::Regular);
         }
@@ -494,12 +505,21 @@ void HostGameScreen::nextTurn() {
         sf::Packet packet;
         packet << GameCommand::UpdatePlayingIdx << player_idx;
         broadcast(packet);
+        if (player_idx == hostIndex && playSoundOnTurnStart) soundOnTurnStart.play();
     }
 }
 
 std::unique_ptr<Screen> HostGameScreen::endGame() {
     sf::Packet packet;
     packet << GameCommand::EndGame;
+    if (players.at(player_idx)->rack.tiles.empty()) {
+        players.at(player_idx)->score += 6;
+        packet << static_cast<uint8_t>(1);
+        packet << player_idx;
+        packet << players.at(player_idx)->score;
+    } else {
+        packet << static_cast<uint8_t>(0);
+    }
     broadcast(packet);
     return std::make_unique<EndScreen>(window_, players, grid);
 }
@@ -556,14 +576,15 @@ void HostGameScreen::disconnectClient(std::unique_ptr<Player>& client) {
     if (client->type() != ClientType::Client) return;
     std::wcerr << client->name << " has been disconnected" << std::endl;
     auto rack = std::move(client->rack);
-    client = std::make_unique<Ai>(client->name + L'[' + Localisator::get("Computer") + L']');
+    auto score = client->score;
+    client = std::make_unique<Ai>(client->name + L" [" + Localisator::get("Computer") + L']');
     client->rack = rack;
+    client->score = score;
 
     uint8_t idx = std::distance(players.begin(), std::find(players.begin(), players.end(), client));
     sf::Packet packet;
-    packet << GameCommand::UpdateName;
+    packet << GameCommand::TurnPlayerToComputer;
     packet << idx;
-    packet << client->name;
     broadcast(packet);
 }
 

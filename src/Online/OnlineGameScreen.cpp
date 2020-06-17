@@ -17,6 +17,10 @@ OnlineGameScreen::OnlineGameScreen(sf::RenderWindow& window, bool fillReserve) :
     mouseLastPos = sf::Mouse::getPosition();
 
     ui.replace(window.getSize());
+    cursor.setPointCount(3);
+    cursor.setRadius(10);
+    centerOrigin(cursor);
+    cursor.setRotation(90);
 
     recycleFeedback.setTexture(RessourceLoader::getTexture("sprites/bin.png"));
     centerOrigin(recycleFeedback);
@@ -24,6 +28,11 @@ OnlineGameScreen::OnlineGameScreen(sf::RenderWindow& window, bool fillReserve) :
 
     text.setFont(RessourceLoader::getFont("fonts/Ubuntu-R.ttf"));
     text.setFillColor(sf::Color::White);
+
+    if (auto setting = Settings::get("playSoundOnTurnStart")) playSoundOnTurnStart = std::get<bool>(setting.value());
+    if (playSoundOnTurnStart) {
+        soundOnTurnStart.setBuffer(RessourceLoader::getSoundBuffer("audio/turn.wav"));
+    }
 }
 
 void OnlineGameScreen::adapt_viewport(sf::RenderWindow& window) {
@@ -31,6 +40,14 @@ void OnlineGameScreen::adapt_viewport(sf::RenderWindow& window) {
     if (selectedTile) selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
     grid.updateTilesPositions();
     ui.replace(window.getSize());
+}
+
+void OnlineGameScreen::toggleMarkers() {
+    for (auto& tile : grid.tiles) {
+        if (tile.shapeID == 6) {
+            tile.disp = !tile.disp;
+        }
+    }
 }
 
 void OnlineGameScreen::selectAtPos(size_t i, Player& player) {

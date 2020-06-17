@@ -11,7 +11,7 @@ enum class LobbyCommand : uint8_t {
 };
 
 enum class GameCommand : uint8_t {
-    ClearMarkers, EndGame, Play, Played, RefillRack, Recycled, UpdateAfterMove, UpdateName, UpdatePlayingIdx, UpdateScore, UpdateScores
+    ClearMarkers, EndGame, Play, Played, RefillRack, Recycled, TurnPlayerToComputer, UpdateAfterMove, UpdatePlayingIdx, UpdateScore, UpdateScores
 };
 
 sf::Packet& operator<<(sf::Packet& packet, const LobbyCommand& command);

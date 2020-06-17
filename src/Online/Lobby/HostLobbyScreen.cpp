@@ -150,7 +150,7 @@ std::unique_ptr<Screen> HostLobbyScreen::execute() {
                     break;
 
                 case sf::Event::TextEntered :
-                    if (event.text.unicode < 32) break; // control chars
+                    if (event.text.unicode < 32 && namerhsText.getString().getSize() < 50) break; // control chars
                     namerhsText.setString(namerhsText.getString().toWideString() + static_cast<wchar_t>(event.text.unicode));
                     broadcastHostName();
                     break;

@@ -5,6 +5,7 @@
 #include "Engine/Screen.hpp"
 #include "UI/Ui.hpp"
 #include "View/Grid.hpp"
+#include <SFML/Audio.hpp>
 #include <SFML/Network.hpp>
 
 class OnlineGameScreen : public Screen {
@@ -18,9 +19,11 @@ protected:
     Controller controller;
 
     Grid grid;
+    void toggleMarkers();
 
     Ui ui;
     sf::Text text;
+    sf::CircleShape cursor;
 
     Tile* selectedTile = nullptr;
     void selectAtPos(size_t i, Player& player);
@@ -35,6 +38,10 @@ protected:
     // online
     uint16_t port;
     sf::SocketSelector selector;
+
+    // settings
+    sf::Sound soundOnTurnStart;
+    bool playSoundOnTurnStart = true;
 };
 
 

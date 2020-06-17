@@ -26,6 +26,10 @@ GameScreen::GameScreen(sf::RenderWindow& window, std::vector<PlayerType> const& 
     mouseLastPos = sf::Mouse::getPosition();
 
     ui.replace(window.getSize());
+    cursor.setPointCount(3);
+    cursor.setRadius(10);
+    centerOrigin(cursor);
+    cursor.setRotation(90);
 
     recycleFeedback.setTexture(RessourceLoader::getTexture("sprites/bin.png"));
     centerOrigin(recycleFeedback);
@@ -182,6 +186,10 @@ std::unique_ptr<Screen> GameScreen::execute() {
                                 toggleRecycleMode();
                             }
                                 break;
+                            case sf::Keyboard::T: {
+                                toggleMarkers();
+                            }
+                                break;
                             case sf::Keyboard::Num1: {
                                 selectAtPos(0);
                             }
@@ -272,7 +280,11 @@ std::unique_ptr<Screen> GameScreen::execute() {
         for (size_t i = 0; i < players.size(); ++i) {
             text.setString(players.at(i)->name + L" : " + std::to_wstring(players.at(i)->score));
             text.setPosition(50, 70 + 50 * i);
-            if (i == player_idx) text.setStyle(sf::Text::Style::Bold);
+            if (i == player_idx) {
+                cursor.setPosition(text.getPosition().x - cursor.getGlobalBounds().width, text.getPosition().y + text.getGlobalBounds().height / 2);
+                window_.draw(cursor);
+                text.setStyle(sf::Text::Style::Bold);
+            }
             window_.draw(text);
             if (i == player_idx) text.setStyle(sf::Text::Style::Regular);
         }
@@ -310,6 +322,14 @@ void GameScreen::removeHints() {
                                     [](auto const& e) { return e.shapeID == 6 && e.color == Yellow; }), grid.tiles.end());
 }
 
+void GameScreen::toggleMarkers() {
+    for (auto& tile : grid.tiles) {
+        if (tile.shapeID == 6) {
+            tile.disp = !tile.disp;
+        }
+    }
+}
+
 void GameScreen::toggleRecycleMode() {
     if (!recycleSelectionMode && !selectedTile && players.at(player_idx)->moves.empty()) {
         recycleSelectionMode = true;
@@ -345,6 +365,7 @@ void GameScreen::endTurnPlayer(bool forced) {
     // vérifie la fin de jeu (le joueur a utilisé toutes ses tuiles)
     if (controller.reserve.empty() && players.at(player_idx)->rack.tiles.empty()) {
         endGame = true;
+        players.at(player_idx)->score += 6;
         return;
     }
     // passe la main

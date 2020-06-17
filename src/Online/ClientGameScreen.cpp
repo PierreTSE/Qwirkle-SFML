@@ -27,7 +27,7 @@ ClientGameScreen::ClientGameScreen(sf::RenderWindow& window, std::unique_ptr<sf:
         switch (type) {
             case 0: // host
                 packet >> name;
-                name += L'[' + Localisator::get("Host") + L']';
+                name = name + (name.empty() ? L"" : L" ") + L'[' + Localisator::get("Host") + L']';
                 break;
             case 1: // client
                 packet >> name;
@@ -168,6 +168,10 @@ std::unique_ptr<Screen> ClientGameScreen::execute() {
                                 toggleRecycleMode();
                             }
                                 break;
+                            case sf::Keyboard::T: {
+                                toggleMarkers();
+                            }
+                                break;
                             case sf::Keyboard::Num1: {
                                 selectAtPos(0, *player);
                             }
@@ -233,7 +237,12 @@ std::unique_ptr<Screen> ClientGameScreen::execute() {
             for (size_t i = 0; i < scores.size(); ++i) {
                 text.setString(scores.at(i).first + L" : " + std::to_wstring(scores.at(i).second));
                 text.setPosition(50, 70 + 50 * i);
-                if (i == playing_idx) text.setStyle(sf::Text::Style::Bold);
+                if (i == playing_idx) {
+                    cursor.setPosition(text.getPosition().x - cursor.getGlobalBounds().width,
+                                       text.getPosition().y + text.getGlobalBounds().height / 2);
+                    window_.draw(cursor);
+                    text.setStyle(sf::Text::Style::Bold);
+                }
                 window_.draw(text);
                 if (i == playing_idx) text.setStyle(sf::Text::Style::Regular);
             }
@@ -259,9 +268,15 @@ std::unique_ptr<Screen> ClientGameScreen::execute() {
                                                             [](auto const& e) { return e.shapeID == 6; }), grid.tiles.end());
                             break;
                         case GameCommand::EndGame:
+                            packet >> n;
+                            if (n) {
+                                packet >> n;
+                                packet >> scores.at(n).second;
+                            }
                             return std::make_unique<EndScreen>(window_, std::move(scores), std::move(grid));
                         case GameCommand::Play:
                             isCurrentTurnToPlay = true;
+                            if (playSoundOnTurnStart) soundOnTurnStart.play();
                             break;
                         case GameCommand::UpdatePlayingIdx:
                             packet >> playing_idx;
@@ -291,9 +306,9 @@ std::unique_ptr<Screen> ClientGameScreen::execute() {
                         case GameCommand::UpdateScores:
                             for (auto& score : scores) packet >> score.second;
                             break;
-                        case GameCommand::UpdateName:
+                        case GameCommand::TurnPlayerToComputer:
                             packet >> n; // player_idx
-                            packet >> scores.at(n).first;
+                            scores.at(n).first = scores.at(n).first + L" [" + Localisator::get("Computer") + L']';
                             break;
                         default:
                             throw std::runtime_error("ClientGameScreen::execute() default switch case reached");

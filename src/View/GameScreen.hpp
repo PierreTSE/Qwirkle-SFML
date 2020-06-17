@@ -23,6 +23,7 @@ private:
     Grid grid;
     void addHints();
     void removeHints();
+    void toggleMarkers();
 
     std::vector<std::unique_ptr<Player>> players;
     size_t player_idx = 0;
@@ -45,6 +46,7 @@ private:
 
     Ui ui;
     sf::Text text;
+    sf::CircleShape cursor;
 
     // settings
     bool forceHints = false;

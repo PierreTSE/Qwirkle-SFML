@@ -23,7 +23,6 @@ void EndScreen::construct() {
     centerOrigin(gameEnded);
 
     mouseLastPos = sf::Mouse::getPosition();
-    grid.setScale(0.999, 0.999);
 }
 
 EndScreen::EndScreen(sf::RenderWindow& window, std::vector<std::unique_ptr<Player>> const& players, Grid grid) :

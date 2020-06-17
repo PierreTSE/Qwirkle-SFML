@@ -80,9 +80,13 @@ std::unique_ptr<Screen> JoinLobbyScreen::execute() {
                                 switch (cursorPos) {
                                     case 0:
                                         namerhsText.setString(namerhsText.getString() + wstr);
+                                        if (namerhsText.getString().getSize() > 50)
+                                            namerhsText.setString(namerhsText.getString().substring(0, 50));
                                         break;
                                     case 1:
                                         hostIPrhsText.setString(hostIPrhsText.getString() + wstr);
+                                        if (hostIPrhsText.getString().getSize() > 15)
+                                            hostIPrhsText.setString(hostIPrhsText.getString().substring(0, 15));
                                         break;
                                 }
                             }
@@ -109,9 +113,9 @@ std::unique_ptr<Screen> JoinLobbyScreen::execute() {
 
                 case sf::Event::TextEntered :
                     if (event.text.unicode < 32) break; // control chars
-                    if (cursorPos == 0) {
+                    if (cursorPos == 0 && namerhsText.getString().getSize() < 50) {
                         namerhsText.setString(namerhsText.getString().toWideString() + static_cast<wchar_t>(event.text.unicode));
-                    } else if (cursorPos == 1 && event.text.unicode < 128) {
+                    } else if (cursorPos == 1 && event.text.unicode < 128 && hostIPrhsText.getString().getSize() < 15) {
                         char c = static_cast<char>(event.text.unicode);
                         if (c == '.' || std::isdigit(c)) {
                             hostIPrhsText.setString(hostIPrhsText.getString() + c);
