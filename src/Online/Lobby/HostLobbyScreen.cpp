@@ -100,6 +100,7 @@ std::unique_ptr<Screen> HostLobbyScreen::execute() {
                             else cursorPos = 3;
                             break;
                         case sf::Keyboard::Right:
+                        case sf::Keyboard::Tab:
                             if (cursorPos < 3) cursorPos += 1;
                             else cursorPos = 0;
                             break;

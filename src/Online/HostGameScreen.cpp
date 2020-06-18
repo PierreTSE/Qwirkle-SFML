@@ -16,7 +16,6 @@ HostGameScreen::HostGameScreen(sf::RenderWindow& window, std::vector<std::unique
             case ClientType::Host:
                 hostIndex = i;
                 player->refillRack(6, controller);
-                player->rack.scale(0.999, 0.999);
                 player->replaceRack(window.getSize());
                 break;
             case ClientType::Client: {
@@ -241,7 +240,6 @@ std::unique_ptr<Screen> HostGameScreen::execute() {
             auto moves = ai.play(controller);
             if (!moves.empty()) {
                 grid.tiles.insert(grid.tiles.end(), moves.begin(), moves.end());
-                std::transform(moves.begin(), moves.end(), std::back_inserter(grid.tiles), [](auto const& e) { return Tile{e}; });
                 Tile marker = Tile(6, Pink);
                 for (auto const& move : moves) {
                     marker.coord = move.coord; // marque les coups joués par l'ordinateur
@@ -388,7 +386,6 @@ std::unique_ptr<Screen> HostGameScreen::execute() {
                 window_.draw(cursor);
                 text.setStyle(sf::Text::Style::Bold);
             }
-            window_.draw(text);
             window_.draw(text);
             if (i == player_idx) text.setStyle(sf::Text::Style::Regular);
         }

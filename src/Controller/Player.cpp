@@ -11,7 +11,6 @@ Player::Player(std::wstring name, Controller& controller, sf::Vector2u const& wi
         name{std::move(name)} {
     rack.centerOrigin();
     refillRack(6, controller);
-    rack.scale(0.999, 0.999); // hack pour forcer l'activation de l'AA
     replaceRack(windowSize);
 }
 

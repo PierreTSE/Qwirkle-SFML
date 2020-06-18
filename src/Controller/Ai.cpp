@@ -16,9 +16,8 @@ std::vector<TileDataWithCoord> Ai::play(Controller const& controller) {
     std::vector<TileDataWithCoord> tilesPool; // rack de TileDataWithCoord
     tilesPool.insert(tilesPool.end(), rack.tiles.begin(), rack.tiles.end());
 
-    auto controllerCopy = controller; // copie de controller
-    controllerCopy.reserve.clear();
-    controllerCopy.reserve.shrink_to_fit();
+    Controller controllerCopy(false); // copie de controller
+    controllerCopy.map = controller.map;
 
     std::sort(tilesPool.begin(), tilesPool.end());
     do {
@@ -56,8 +55,7 @@ void Ai::bestMove(Controller& controller, std::vector<TileDataWithCoord>& input,
     std::pair<uint32_t, sf::Vector2i> currBestMove = {0, {-1, -1}}; // best <score, coord>
     if (controller.map.empty()) {
         // cas où l'ordi joue le tout premier coup
-        currBestMove = {1, {49, 49}};
-        // hack le milieu de la grid de jeu est hardcodé
+        currBestMove = {1, {49, 49}}; // hack le milieu de la grid de jeu est hardcodé
     } else {
         // on cherche la position qui rapporte le plus de points pour la tuile courante
         for (auto const& potentialMove : legitMoves) {
@@ -86,8 +84,8 @@ void Ai::bestMove(Controller& controller, std::vector<TileDataWithCoord>& input,
 
 bool Ai::isConnectedToSomeIn(sf::Vector2i const& coords, std::vector<TileDataWithCoord> const& input, Controller const& controller) {
     if (input.empty()) return true;
-    bool alignsWithAll = std::find_if_not(input.begin(), input.end(), [&](auto const& e) { return e.coord.x == coords.x; }) == input.end() ||
-                         std::find_if_not(input.begin(), input.end(), [&](auto const& e) { return e.coord.y == coords.y; }) == input.end();
+    const bool alignsWithAll = std::find_if_not(input.begin(), input.end(), [&](auto const& e) { return e.coord.x == coords.x; }) == input.end() ||
+                               std::find_if_not(input.begin(), input.end(), [&](auto const& e) { return e.coord.y == coords.y; }) == input.end();
     if (!alignsWithAll) return false;
 
     // vérifie que l'on peut tracer une ligne sans trou jusqu'à l'un des coups

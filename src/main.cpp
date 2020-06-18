@@ -1,19 +1,30 @@
 #include "Engine/RessourceLoader.hpp"
+#include "Engine/Settings.hpp"
 #include "View/TitleScreen.hpp"
 #include <iostream>
 
 
 int main(int argc, char** argv) {
+    const std::string appName = "Qwirkle-SFML "
+                                + std::to_string(QWIRKLE_SFML_MAJOR) + "."
+                                + std::to_string(QWIRKLE_SFML_MINOR) + "."
+                                + std::to_string(QWIRKLE_SFML_PATCH);
+
     for (int i = 1; i < argc; ++i) {
         if (auto arg = std::string(argv[i]); arg == "--version" || arg == "-V") {
-            std::cout << "Qwirkle-SFML " << QWIRKLE_SFML_MAJOR << "." << QWIRKLE_SFML_MINOR << "." << QWIRKLE_SFML_PATCH << std::endl;
+            std::cout << appName << std::endl;
             std::exit(EXIT_SUCCESS);
         }
     }
 
-    // Création de la fenêtre du jeu
-    sf::RenderWindow window(
-            sf::VideoMode{1280, 720}, "Qwirkle", sf::Style::Default, sf::ContextSettings(0, 0, 8));
+    // Settings
+    if (auto setting = Settings::get("antialiasing")) RessourceLoader::setSmooth(std::get<bool>(setting.value()));
+
+    // Création de la fenêtre de jeu
+    sf::RenderWindow window(sf::VideoMode{1280, 720},
+                            appName,
+                            sf::Style::Default,
+                            sf::ContextSettings(0, 0, 16));
 
     // Icone
     sf::Image thumbnail;

@@ -8,6 +8,8 @@ bin
 *.rc
 *.ico
 *.7z
+*.gz
+*.xz
 
 # visual studio
 .vs

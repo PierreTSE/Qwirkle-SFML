@@ -44,6 +44,7 @@ std::unique_ptr<Screen> DefaultLobbyScreen::execute() {
                             else cursorPos = 1;
                             break;
                         case sf::Keyboard::Down:
+                        case sf::Keyboard::Tab:
                             if (cursorPos < 1) cursorPos += 1;
                             else cursorPos = 0;
                             break;

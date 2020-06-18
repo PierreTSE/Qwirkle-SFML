@@ -14,7 +14,6 @@ GameScreen::GameScreen(sf::RenderWindow& window, std::vector<PlayerType> const& 
         grid(40, 40, 100, 100, 5) {
     grid.centerOrigin();
     grid.centerIn(window.getSize());
-    grid.scale(0.999, 0.999); // hack pour forcer l'activation de l'AA
 
     size_t player = 0, ai = 0;
     for (auto const playerType : playerTypes) {
@@ -237,7 +236,6 @@ std::unique_ptr<Screen> GameScreen::execute() {
                 auto moves = ai->play(controller);
                 if (!moves.empty()) {
                     grid.tiles.insert(grid.tiles.end(), moves.begin(), moves.end());
-                    std::transform(moves.begin(), moves.end(), std::back_inserter(grid.tiles), [](auto const& e) { return Tile{e}; });
                     Tile marker = Tile(6, Pink);
                     for (auto const& move : moves) {
                         marker.coord = move.coord; // marque les coups joués par l'ordinateur
@@ -401,14 +399,18 @@ void GameScreen::endTurnAi() {
 
 void GameScreen::selectAtPos(size_t i) {
     auto& player = *players.at(player_idx);
-    if (!recycleSelectionMode && player.rack.tiles.size() > i && player.rack.tiles.at(i).disp) {
-        if (selectedTile) {
-            selectedTile = nullptr;
-            player.updateTilesPositions();
-            removeHints();
+    if (!recycleSelectionMode) {
+        if (player.rack.tiles.size() > i && player.rack.tiles.at(i).disp) {
+            if (selectedTile) {
+                selectedTile = nullptr;
+                player.updateTilesPositions();
+                removeHints();
+            }
+            selectedTile = &player.rack.tiles.at(i);
+            selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
+            if (forceHints) addHints();
         }
-        selectedTile = &player.rack.tiles.at(i);
-        selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
-        if (forceHints) addHints();
+    } else {
+        if (player.rack.tiles.size() > i) player.addRecycleSelectionMarker(i);
     }
 }

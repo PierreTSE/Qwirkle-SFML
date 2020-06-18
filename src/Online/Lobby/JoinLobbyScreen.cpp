@@ -57,6 +57,7 @@ std::unique_ptr<Screen> JoinLobbyScreen::execute() {
                             else cursorPos = 2;
                             break;
                         case sf::Keyboard::Down:
+                        case sf::Keyboard::Tab:
                             if (cursorPos < 2) cursorPos += 1;
                             else cursorPos = 0;
                             break;

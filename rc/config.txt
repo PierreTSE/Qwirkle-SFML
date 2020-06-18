@@ -1,10 +1,14 @@
-#### Solo
+#### Global
 
 # name of the locale file (whithout extension)
 #locale = sFR
 
 # colorblind mode
 #colorblind = btrue
+
+antialiasing = btrue
+
+#### Solo
 
 # show legal places when selecting a tile
 forceHints = bfalse

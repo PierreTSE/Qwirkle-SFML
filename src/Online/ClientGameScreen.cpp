@@ -14,7 +14,6 @@ ClientGameScreen::ClientGameScreen(sf::RenderWindow& window, std::unique_ptr<sf:
 
     // player data
     refillPlayerRack(packet, 6);
-    player->rack.scale(0.999, 0.999);
     player->replaceRack(window.getSize());
 
     // ui data

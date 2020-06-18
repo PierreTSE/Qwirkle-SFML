@@ -9,11 +9,15 @@ RessourceReference<sf::Font> RessourceLoader::getFont(std::string const& name) {
         return RessourceLoader::getInstance().loadFont(name);
 }
 
-RessourceReference<sf::Texture> RessourceLoader::getTexture(std::string const& name) {
+RessourceReference<sf::Texture> RessourceLoader::getTexture(std::string const& name, bool smooth) {
     if (RessourceLoader::getInstance().loadedTextures.find(name) != RessourceLoader::getInstance().loadedTextures.end())
         return RessourceLoader::getInstance().loadedTextures[name].get();
     else
-        return RessourceLoader::getInstance().loadTexture(name);
+        return RessourceLoader::getInstance().loadTexture(name, smooth);
+}
+
+RessourceReference<sf::Texture> RessourceLoader::getTexture(std::string const& name) {
+    return getTexture(name, RessourceLoader::getInstance().isSmooth);
 }
 
 RessourceReference<sf::SoundBuffer> RessourceLoader::getSoundBuffer(std::string const& name) {
@@ -23,10 +27,11 @@ RessourceReference<sf::SoundBuffer> RessourceLoader::getSoundBuffer(std::string 
         return RessourceLoader::getInstance().loadSoundBuffer(name);
 }
 
-RessourceReference<sf::Texture> RessourceLoader::loadTexture(std::string const& name) {
+RessourceReference<sf::Texture> RessourceLoader::loadTexture(std::string const& name, bool smooth) {
     const std::string path = getPath(name);
     auto tex = std::make_unique<sf::Texture>();
     tex->loadFromFile(path);
+    tex->setSmooth(smooth);
     return loadedTextures.insert({name, std::move(tex)}).first->second.get();
 }
 
@@ -62,4 +67,12 @@ RessourceReference<sf::SoundBuffer> RessourceLoader::loadSoundBuffer(std::string
 RessourceLoader& RessourceLoader::getInstance() {
     static RessourceLoader instance;
     return instance;
+}
+
+void RessourceLoader::setSmooth(bool smooth) {
+    auto& instance = RessourceLoader::getInstance();
+    instance.isSmooth = smooth;
+    for (auto&[_, tex] : instance.loadedTextures) {
+        tex->setSmooth(smooth);
+    }
 }

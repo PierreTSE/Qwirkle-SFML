@@ -12,7 +12,6 @@ OnlineGameScreen::OnlineGameScreen(sf::RenderWindow& window, bool fillReserve) :
 
     grid.centerOrigin();
     grid.centerIn(window.getSize());
-    grid.scale(0.999, 0.999); // hack pour forcer l'activation de l'AA
 
     mouseLastPos = sf::Mouse::getPosition();
 
@@ -51,12 +50,16 @@ void OnlineGameScreen::toggleMarkers() {
 }
 
 void OnlineGameScreen::selectAtPos(size_t i, Player& player) {
-    if (!recycleSelectionMode && player.rack.tiles.size() > i && player.rack.tiles.at(i).disp) {
-        if (selectedTile) {
-            selectedTile = nullptr;
-            player.updateTilesPositions();
+    if (!recycleSelectionMode) {
+        if (player.rack.tiles.size() > i && player.rack.tiles.at(i).disp) {
+            if (selectedTile) {
+                selectedTile = nullptr;
+                player.updateTilesPositions();
+            }
+            selectedTile = &player.rack.tiles.at(i);
+            selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
         }
-        selectedTile = &player.rack.tiles.at(i);
-        selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
+    } else {
+        if (player.rack.tiles.size() > i) player.addRecycleSelectionMarker(i);
     }
 }

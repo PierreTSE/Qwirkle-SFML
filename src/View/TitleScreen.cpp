@@ -64,6 +64,7 @@ std::unique_ptr<Screen> TitleScreen::execute() {
                             else cursorPos = 3;
                             break;
                         case sf::Keyboard::Down:
+                        case sf::Keyboard::Tab:
                             if (cursorPos < 3) cursorPos += 1;
                             else cursorPos = 0;
                             break;
