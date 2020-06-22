@@ -6,7 +6,8 @@ The [Qwirkle](https://en.wikipedia.org/wiki/Qwirkle) game in C++, based on the [
 
 ### Download
 
-A compiled version for [Windows](https://drive.google.com/file/d/1Gf7k-h0_jVgYyOGlJ-ZrQrKzmFR7-Mci/view?usp=sharing).
+A compiled version for [Windows](https://drive.google.com/file/d/1Gf7k-h0_jVgYyOGlJ-ZrQrKzmFR7-Mci/view?usp=sharing),
+for [Linux](https://drive.google.com/file/d/11rbWH76Zcx97EAnYyUypJA5zYuHB9qGm/view?usp=sharing).
 
 ### Installation from source
 
