@@ -36,6 +36,7 @@ TitleScreen::TitleScreen(sf::RenderWindow& window) : Screen(window) {
     rightCursor = leftCursor;
     leftCursor.setRotation(-90);
     rightCursor.setRotation(90);
+    window_.setMouseCursor(mouseCursor);
 
     TitleScreen::adapt_viewport(window_);
 }
@@ -57,6 +58,19 @@ std::unique_ptr<Screen> TitleScreen::execute() {
             auto result = manageEvent(event);
             if (result) return std::move(*result);
             switch (event.type) {
+                case sf::Event::MouseMoved: {
+                    const sf::Vector2f pos = {static_cast<float>(sf::Mouse::getPosition(window_).x),
+                                              static_cast<float>(sf::Mouse::getPosition(window_).y)};
+                    if ((cursorPos < 2 && (leftCursor.getGlobalBounds().contains(pos) || rightCursor.getGlobalBounds().contains(pos))) ||
+                        playerText.getGlobalBounds().contains(pos) ||
+                        aiText.getGlobalBounds().contains(pos) ||
+                        startText.getGlobalBounds().contains(pos) ||
+                        onlineGameText.getGlobalBounds().contains(pos)) {
+                        if (mouseCursor.setType(sf::Cursor::Type::Hand)) window_.setMouseCursor(mouseCursor);
+                    } else if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+                }
+                    break;
+
                 case sf::Event::KeyPressed: {
                     switch (event.key.code) {
                         case sf::Keyboard::Up:
@@ -81,6 +95,7 @@ std::unique_ptr<Screen> TitleScreen::execute() {
                     }
                 }
                     break;
+
                 case sf::Event::MouseButtonPressed : {
                     const auto posint = sf::Mouse::getPosition(window_);
                     const sf::Vector2f pos = {static_cast<float>(posint.x), static_cast<float>(posint.y)};

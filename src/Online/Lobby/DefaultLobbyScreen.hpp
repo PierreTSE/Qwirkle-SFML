@@ -1,6 +1,7 @@
 #ifndef QWIRKLE_SFML_DEFAULTLOBBYSCREEN_HPP
 #define QWIRKLE_SFML_DEFAULTLOBBYSCREEN_HPP
 
+#include "Engine/Cursor.hpp"
 #include "Engine/Screen.hpp"
 
 class DefaultLobbyScreen : public Screen {
@@ -13,6 +14,7 @@ public:
 private:
     sf::CircleShape cursor;
     uint8_t cursorPos = 0;
+    Cursor mouseCursor;
 
     sf::Text createLobbyText;
     sf::Text joinLobbyText;

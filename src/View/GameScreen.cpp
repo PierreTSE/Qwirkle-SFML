@@ -29,6 +29,7 @@ GameScreen::GameScreen(sf::RenderWindow& window, std::vector<PlayerType> const& 
     cursor.setRadius(10);
     centerOrigin(cursor);
     cursor.setRotation(90);
+    window_.setMouseCursor(mouseCursor);
 
     recycleFeedback.setTexture(RessourceLoader::getTexture("sprites/bin.png"));
     centerOrigin(recycleFeedback);
@@ -65,12 +66,35 @@ std::unique_ptr<Screen> GameScreen::execute() {
 
             switch (event.type) {
                 case sf::Event::MouseMoved: {
+                    const auto mousePos = sf::Mouse::getPosition(window_);
                     if (selectedTile) {
-                        selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
-                    } else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                        grid.move(static_cast<float>(event.mouseMove.x - mouseLastPos.x),
-                                  static_cast<float>(event.mouseMove.y - mouseLastPos.y));
-                        grid.updateTilesPositions();
+                        selectedTile->setPosition(mousePos.x, mousePos.y);
+                    } else {
+                        if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                            grid.move(static_cast<float>(event.mouseMove.x - mouseLastPos.x),
+                                      static_cast<float>(event.mouseMove.y - mouseLastPos.y));
+                            grid.updateTilesPositions();
+                        }
+                        if (!ai) {
+                            if (auto const&[rx, ry] = player.rack.getTileCoordinates(mousePos);
+                                    (ui.isOnRecycleButton(mousePos) &&
+                                     ((!recycleSelectionMode && player.moves.empty()) ||
+                                      (recycleSelectionMode && std::find_if(player.rack.tiles.begin(), player.rack.tiles.end(),
+                                                                            [](Tile const& t) { return t.shapeID == 6; })
+                                                               != player.rack.tiles.end()))) ||
+                                    (ui.isOnNextTurnButton(mousePos) && !(player.moves.empty() || recycleSelectionMode)) ||
+                                    (rx != -1 && ry != -1 &&
+                                     ((!recycleSelectionMode && player.rack.tiles.size() > rx && player.rack.tiles.at(rx).disp) ||
+                                      (recycleSelectionMode && std::find_if(player.rack.tiles.begin(), player.rack.tiles.end(),
+                                                                            [&](Tile const& t) {
+                                                                                return t.shapeID == 6 && t.coord.x == rx;
+                                                                            })
+                                                               == player.rack.tiles.end())))) {
+                                if (mouseCursor.setType(sf::Cursor::Type::Hand)) window_.setMouseCursor(mouseCursor);
+                            } else {
+                                if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+                            }
+                        }
                     }
                     mouseLastPos = {event.mouseMove.x, event.mouseMove.y};
                 }
@@ -120,6 +144,7 @@ std::unique_ptr<Screen> GameScreen::execute() {
                                             selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
                                             if (forceHints) addHints();
                                         }
+                                        if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
                                     }
                                 }
                             }
@@ -240,7 +265,7 @@ std::unique_ptr<Screen> GameScreen::execute() {
                     for (auto const& move : moves) {
                         marker.coord = move.coord; // marque les coups joués par l'ordinateur
                         grid.tiles.emplace_back(marker); // ajoute le coup à la grille visuelle
-                        controller.map.emplace(move.coord, TileData{move}); // ajoute le coup à la carte logique
+                        controller.map.emplace(move.coord, static_cast<TileData>(move)); // ajoute le coup à la carte logique
                     }
                     grid.updateTilesPositions();
                 } else {
@@ -329,9 +354,13 @@ void GameScreen::toggleMarkers() {
 }
 
 void GameScreen::toggleRecycleMode() {
-    if (!recycleSelectionMode && !selectedTile && players.at(player_idx)->moves.empty()) {
+    auto& player = players.at(player_idx);
+    if (!recycleSelectionMode && !selectedTile && player->moves.empty()) {
         recycleSelectionMode = true;
-    } else if (recycleSelectionMode) {
+        if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+    } else if (recycleSelectionMode &&
+               std::find_if(player->rack.tiles.begin(), player->rack.tiles.end(), [](Tile const& t) { return t.shapeID == 6; })
+               != player->rack.tiles.end()) {
         players.at(player_idx)->recycle(controller);
         recycleSelectionMode = false;
         endTurnPlayer(true);
@@ -341,6 +370,8 @@ void GameScreen::toggleRecycleMode() {
 void GameScreen::endTurnPlayer(bool forced) {
     auto& player = *players.at(player_idx);
     if ((player.moves.empty() || recycleSelectionMode) && !forced) return;
+    // changement de curseur
+    if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
     // enregistre les coups joués --> pas besoin, déjà fait au coup par coup
     // for (auto const& move : player.moves) controller.map[move.second.coord] = TileData(move.second);
     // incrémente le score

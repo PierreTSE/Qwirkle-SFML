@@ -1,6 +1,7 @@
 #ifndef QWIRKLE_SFML_TITLESCREEN_HPP
 #define QWIRKLE_SFML_TITLESCREEN_HPP
 
+#include "Engine/Cursor.hpp"
 #include "Engine/Screen.hpp"
 
 class TitleScreen : public Screen {
@@ -11,6 +12,7 @@ public:
     std::unique_ptr<Screen> execute() override;
 
 private:
+    Cursor mouseCursor;
     sf::Sprite qwirkle;
     sf::Text sfml;
     sf::Text playerText;

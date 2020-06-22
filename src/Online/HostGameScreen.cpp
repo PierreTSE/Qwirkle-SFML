@@ -81,12 +81,35 @@ std::unique_ptr<Screen> HostGameScreen::execute() {
             switch (event.type) {
 
                 case sf::Event::MouseMoved: {
+                    const auto mousePos = sf::Mouse::getPosition(window_);
                     if (selectedTile) {
-                        selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
-                    } else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                        grid.move(static_cast<float>(event.mouseMove.x - mouseLastPos.x),
-                                  static_cast<float>(event.mouseMove.y - mouseLastPos.y));
-                        grid.updateTilesPositions();
+                        selectedTile->setPosition(mousePos.x, mousePos.y);
+                    } else {
+                        if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                            grid.move(static_cast<float>(event.mouseMove.x - mouseLastPos.x),
+                                      static_cast<float>(event.mouseMove.y - mouseLastPos.y));
+                            grid.updateTilesPositions();
+                        }
+                        if (player->type() == ClientType::Host) {
+                            if (auto const&[rx, ry] = player->rack.getTileCoordinates(mousePos);
+                                    (ui.isOnRecycleButton(mousePos) &&
+                                     ((!recycleSelectionMode && player->moves.empty()) ||
+                                      (recycleSelectionMode && std::find_if(player->rack.tiles.begin(), player->rack.tiles.end(),
+                                                                            [](Tile const& t) { return t.shapeID == 6; })
+                                                               != player->rack.tiles.end()))) ||
+                                    (ui.isOnNextTurnButton(mousePos) && !(player->moves.empty() || recycleSelectionMode)) ||
+                                    (rx != -1 && ry != -1 &&
+                                     ((!recycleSelectionMode && player->rack.tiles.size() > rx && player->rack.tiles.at(rx).disp) ||
+                                      (recycleSelectionMode && std::find_if(player->rack.tiles.begin(), player->rack.tiles.end(),
+                                                                            [&](Tile const& t) {
+                                                                                return t.shapeID == 6 && t.coord.x == rx;
+                                                                            })
+                                                               == player->rack.tiles.end())))) {
+                                if (mouseCursor.setType(sf::Cursor::Type::Hand)) window_.setMouseCursor(mouseCursor);
+                            } else {
+                                if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+                            }
+                        }
                     }
                     mouseLastPos = {event.mouseMove.x, event.mouseMove.y};
                 }
@@ -136,6 +159,7 @@ std::unique_ptr<Screen> HostGameScreen::execute() {
                                             selectedTile = &player->rack.tiles.at(rackTileCoordinates.x);
                                             selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
                                         }
+                                        if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
                                     }
                                 }
                             }
@@ -382,7 +406,8 @@ std::unique_ptr<Screen> HostGameScreen::execute() {
             text.setString(players.at(i)->name + L" : " + std::to_wstring(players.at(i)->score));
             text.setPosition(50, 70 + 50 * i);
             if (i == player_idx) {
-                cursor.setPosition(text.getPosition().x - cursor.getGlobalBounds().width, text.getPosition().y + text.getGlobalBounds().height / 2);
+                cursor.setPosition(text.getPosition().x - cursor.getGlobalBounds().width,
+                                   text.getPosition().y + text.getGlobalBounds().height / 2);
                 window_.draw(cursor);
                 text.setStyle(sf::Text::Style::Bold);
             }
@@ -403,9 +428,13 @@ std::unique_ptr<Screen> HostGameScreen::execute() {
 
 void HostGameScreen::toggleRecycleMode() {
     assert(player_idx == hostIndex);
-    if (!recycleSelectionMode && !selectedTile && players.at(player_idx)->moves.empty()) {
+    auto& player = players.at(player_idx);
+    if (!recycleSelectionMode && !selectedTile && player->moves.empty()) {
         recycleSelectionMode = true;
-    } else if (recycleSelectionMode) {
+        if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+    } else if (recycleSelectionMode &&
+               std::find_if(player->rack.tiles.begin(), player->rack.tiles.end(), [](Tile const& t) { return t.shapeID == 6; })
+               != player->rack.tiles.end()) {
         players.at(player_idx)->recycle(controller);
         recycleSelectionMode = false;
         nextTurn();
@@ -416,6 +445,8 @@ void HostGameScreen::endTurnPlayer() {
     assert(player_idx == hostIndex);
     auto& host = *players.at(player_idx);
     if (host.moves.empty()) return;
+    // changement de curseur
+    if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
     // prépare le paquet
     sf::Packet packet;
     packet << GameCommand::UpdateAfterMove;

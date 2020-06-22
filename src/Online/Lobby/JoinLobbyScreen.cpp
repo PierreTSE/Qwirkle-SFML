@@ -15,6 +15,7 @@ JoinLobbyScreen::JoinLobbyScreen(sf::RenderWindow& window) : Screen(window) {
     cursor.setRadius(10);
     centerOrigin(cursor);
     cursor.setRotation(90);
+    window_.setMouseCursor(mouseCursor);
 
     namelhsText.setFont(RessourceLoader::getFont("fonts/Ubuntu-R.ttf"));
     namelhsText.setCharacterSize(20);
@@ -50,6 +51,17 @@ std::unique_ptr<Screen> JoinLobbyScreen::execute() {
             auto result = manageEvent(event);
             if (result) return std::move(*result);
             switch (event.type) {
+                case sf::Event::MouseMoved: {
+                    const sf::Vector2f pos = {static_cast<float>(sf::Mouse::getPosition(window_).x),
+                                              static_cast<float>(sf::Mouse::getPosition(window_).y)};
+                    if (namelhsText.getGlobalBounds().contains(pos) ||
+                        hostIPlhsText.getGlobalBounds().contains(pos) ||
+                        joinText.getGlobalBounds().contains(pos)) {
+                        if (mouseCursor.setType(sf::Cursor::Type::Hand)) window_.setMouseCursor(mouseCursor);
+                    } else if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+                }
+                    break;
+
                 case sf::Event::KeyPressed:
                     switch (event.key.code) {
                         case sf::Keyboard::Up:

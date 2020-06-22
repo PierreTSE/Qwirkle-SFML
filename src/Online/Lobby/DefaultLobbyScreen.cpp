@@ -11,6 +11,7 @@ DefaultLobbyScreen::DefaultLobbyScreen(sf::RenderWindow& window) : Screen(window
     cursor.setRadius(10);
     centerOrigin(cursor);
     cursor.setRotation(90);
+    window_.setMouseCursor(mouseCursor);
 
     createLobbyText.setFont(RessourceLoader::getFont("fonts/Ubuntu-R.ttf"));
     createLobbyText.setCharacterSize(30);
@@ -37,6 +38,16 @@ std::unique_ptr<Screen> DefaultLobbyScreen::execute() {
             auto result = manageEvent(event);
             if (result) return std::move(*result);
             switch (event.type) {
+                case sf::Event::MouseMoved: {
+                    const sf::Vector2f pos = {static_cast<float>(sf::Mouse::getPosition(window_).x),
+                                              static_cast<float>(sf::Mouse::getPosition(window_).y)};
+                    if (createLobbyText.getGlobalBounds().contains(pos) ||
+                        joinLobbyText.getGlobalBounds().contains(pos)) {
+                        if (mouseCursor.setType(sf::Cursor::Type::Hand)) window_.setMouseCursor(mouseCursor);
+                    } else if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+                }
+                    break;
+
                 case sf::Event::KeyPressed: {
                     switch (event.key.code) {
                         case sf::Keyboard::Up:

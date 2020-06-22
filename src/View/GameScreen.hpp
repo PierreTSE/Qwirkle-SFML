@@ -3,6 +3,7 @@
 
 #include "Controller/Controller.hpp"
 #include "Controller/Player.hpp"
+#include "Engine/Cursor.hpp"
 #include "Engine/Screen.hpp"
 #include "UI/Ui.hpp"
 #include "View/Grid.hpp"
@@ -47,6 +48,7 @@ private:
     Ui ui;
     sf::Text text;
     sf::CircleShape cursor;
+    Cursor mouseCursor;
 
     // settings
     bool forceHints = false;

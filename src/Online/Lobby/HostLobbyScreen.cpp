@@ -28,6 +28,7 @@ HostLobbyScreen::HostLobbyScreen(sf::RenderWindow& window) : Screen(window) {
     cursor.setRadius(10);
     centerOrigin(cursor);
     cursor.setRotation(90);
+    window_.setMouseCursor(mouseCursor);
 
     bgNames.setFillColor({0, 0, 0, 128});
     bgNames.setPosition(50, 170);
@@ -92,6 +93,17 @@ std::unique_ptr<Screen> HostLobbyScreen::execute() {
             auto result = manageEvent(event);
             if (result) return std::move(*result);
             switch (event.type) {
+                case sf::Event::MouseMoved: {
+                    const sf::Vector2f pos = {static_cast<float>(sf::Mouse::getPosition(window_).x),
+                                              static_cast<float>(sf::Mouse::getPosition(window_).y)};
+                    if (clearPlayersText.getGlobalBounds().contains(pos) ||
+                        clearComputersText.getGlobalBounds().contains(pos) ||
+                        addComputerText.getGlobalBounds().contains(pos) ||
+                        startText.getGlobalBounds().contains(pos)) {
+                        if (mouseCursor.setType(sf::Cursor::Type::Hand)) window_.setMouseCursor(mouseCursor);
+                    } else if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+                }
+                    break;
 
                 case sf::Event::KeyPressed:
                     switch (event.key.code) {

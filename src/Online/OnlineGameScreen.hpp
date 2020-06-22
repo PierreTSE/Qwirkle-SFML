@@ -2,6 +2,7 @@
 #define QWIRKLE_SFML_ONLINEGAMESCREEN_HPP
 
 #include "Controller/Player.hpp"
+#include "Engine/Cursor.hpp"
 #include "Engine/Screen.hpp"
 #include "UI/Ui.hpp"
 #include "View/Grid.hpp"
@@ -24,6 +25,7 @@ protected:
     Ui ui;
     sf::Text text;
     sf::CircleShape cursor;
+    Cursor mouseCursor;
 
     Tile* selectedTile = nullptr;
     void selectAtPos(size_t i, Player& player);

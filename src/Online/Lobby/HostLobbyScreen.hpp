@@ -1,6 +1,7 @@
 #ifndef QWIRKLE_SFML_HOSTLOBBYSCREEN_HPP
 #define QWIRKLE_SFML_HOSTLOBBYSCREEN_HPP
 
+#include "Engine/Cursor.hpp"
 #include "Engine/Screen.hpp"
 #include "Online/Client.hpp"
 
@@ -18,6 +19,7 @@ private:
     // interface
     sf::CircleShape cursor;
     uint8_t cursorPos = 0;
+    Cursor mouseCursor;
 
     sf::Text localIPText;
     sf::Text publicIPText;

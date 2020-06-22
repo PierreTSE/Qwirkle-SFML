@@ -1,6 +1,7 @@
 #ifndef QWIRKLE_SFML_JOINLOBBYSCREEN_HPP
 #define QWIRKLE_SFML_JOINLOBBYSCREEN_HPP
 
+#include "Engine/Cursor.hpp"
 #include "Engine/Screen.hpp"
 #include "Online/Lobby/WaitingLobbyScreen.hpp"
 #include <SFML/Network.hpp>
@@ -17,11 +18,12 @@ private:
     // interface
     sf::CircleShape cursor;
     uint8_t cursorPos = 0;
+    Cursor mouseCursor;
 
-    sf::Text namerhsText;
     sf::Text namelhsText;
-    sf::Text hostIPrhsText;
+    sf::Text namerhsText;
     sf::Text hostIPlhsText;
+    sf::Text hostIPrhsText;
     sf::Text joinText;
 
     sf::RectangleShape bgNames;

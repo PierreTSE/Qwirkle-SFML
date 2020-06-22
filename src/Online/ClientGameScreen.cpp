@@ -59,12 +59,35 @@ std::unique_ptr<Screen> ClientGameScreen::execute() {
                 switch (event.type) {
 
                     case sf::Event::MouseMoved: {
+                        const auto mousePos = sf::Mouse::getPosition(window_);
                         if (selectedTile) {
-                            selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
-                        } else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                            grid.move(static_cast<float>(event.mouseMove.x - mouseLastPos.x),
-                                      static_cast<float>(event.mouseMove.y - mouseLastPos.y));
-                            grid.updateTilesPositions();
+                            selectedTile->setPosition(mousePos.x, mousePos.y);
+                        } else {
+                            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                                grid.move(static_cast<float>(event.mouseMove.x - mouseLastPos.x),
+                                          static_cast<float>(event.mouseMove.y - mouseLastPos.y));
+                                grid.updateTilesPositions();
+                            }
+                            if (isCurrentTurnToPlay) {
+                                if (auto const&[rx, ry] = player->rack.getTileCoordinates(mousePos);
+                                        (ui.isOnRecycleButton(mousePos) &&
+                                         ((!recycleSelectionMode && player->moves.empty()) ||
+                                          (recycleSelectionMode && std::find_if(player->rack.tiles.begin(), player->rack.tiles.end(),
+                                                                                [](Tile const& t) { return t.shapeID == 6; })
+                                                                   != player->rack.tiles.end()))) ||
+                                        (ui.isOnNextTurnButton(mousePos) && !(player->moves.empty() || recycleSelectionMode)) ||
+                                        (rx != -1 && ry != -1 &&
+                                         ((!recycleSelectionMode && player->rack.tiles.size() > rx && player->rack.tiles.at(rx).disp) ||
+                                          (recycleSelectionMode && std::find_if(player->rack.tiles.begin(), player->rack.tiles.end(),
+                                                                                [&](Tile const& t) {
+                                                                                    return t.shapeID == 6 && t.coord.x == rx;
+                                                                                })
+                                                                   == player->rack.tiles.end())))) {
+                                    if (mouseCursor.setType(sf::Cursor::Type::Hand)) window_.setMouseCursor(mouseCursor);
+                                } else {
+                                    if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+                                }
+                            }
                         }
                         mouseLastPos = {event.mouseMove.x, event.mouseMove.y};
                     }
@@ -114,6 +137,7 @@ std::unique_ptr<Screen> ClientGameScreen::execute() {
                                                 selectedTile = &player->rack.tiles.at(rackTileCoordinates.x);
                                                 selectedTile->setPosition(sf::Mouse::getPosition(window_).x, sf::Mouse::getPosition(window_).y);
                                             }
+                                            if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
                                         }
                                     }
                                 }
@@ -341,7 +365,10 @@ void ClientGameScreen::refillPlayerRack(sf::Packet& packet, uint8_t n) {
 void ClientGameScreen::toggleRecycleMode() {
     if (!recycleSelectionMode && !selectedTile && player->moves.empty()) {
         recycleSelectionMode = true;
-    } else if (recycleSelectionMode) {
+        if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+    } else if (recycleSelectionMode &&
+               std::find_if(player->rack.tiles.begin(), player->rack.tiles.end(), [](Tile const& t) { return t.shapeID == 6; })
+               != player->rack.tiles.end()) {
         recyclePlayer();
     }
 }
@@ -376,7 +403,8 @@ void ClientGameScreen::recyclePlayer() {
     if (!(packet >> command)) throw DisconnectedException();
     if (command != GameCommand::RefillRack)
         throw std::runtime_error(
-                "ClientGameScreen::recyclePlayer() : Bad command received instead of RefillRack : " + std::to_string(static_cast<uint8_t>(command)));
+                "ClientGameScreen::recyclePlayer() : Bad command received instead of RefillRack : " +
+                std::to_string(static_cast<uint8_t>(command)));
     refillPlayerRack(packet, selected.size());
     // passe la main
     playing_idx++;
@@ -385,6 +413,9 @@ void ClientGameScreen::recyclePlayer() {
 void ClientGameScreen::endTurnPlayer() {
     if (player->moves.empty() || recycleSelectionMode) return;
     isCurrentTurnToPlay = false;
+    // changement de curseur
+    if (mouseCursor.setType(sf::Cursor::Type::Arrow)) window_.setMouseCursor(mouseCursor);
+    // prépare le paquet
     sf::Packet packet;
     packet << GameCommand::Played;
     // enregistre les coups joués
@@ -410,7 +441,8 @@ void ClientGameScreen::endTurnPlayer() {
     if (!(packet >> command)) throw DisconnectedException();
     if (command != GameCommand::RefillRack)
         throw std::runtime_error(
-                "ClientGameScreen::endTurnPlayer() : Bad command received instead of RefillRack : " + std::to_string(static_cast<uint8_t>(command)));
+                "ClientGameScreen::endTurnPlayer() : Bad command received instead of RefillRack : " +
+                std::to_string(static_cast<uint8_t>(command)));
     uint8_t refillSize;
     packet >> refillSize;
     refillPlayerRack(packet, refillSize);

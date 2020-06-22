@@ -19,12 +19,15 @@ int main(int argc, char** argv) {
 
     // Settings
     if (auto setting = Settings::get("antialiasing")) RessourceLoader::setSmooth(std::get<bool>(setting.value()));
+    uint8_t antialiasingLevel = 8;
+    if (auto setting = Settings::get("antialiasingLevel")) antialiasingLevel = std::get<int>(setting.value());
+
 
     // Création de la fenêtre de jeu
     sf::RenderWindow window(sf::VideoMode{1280, 720},
                             appName,
                             sf::Style::Default,
-                            sf::ContextSettings(0, 0, 16));
+                            sf::ContextSettings(0, 0, antialiasingLevel));
 
     // Icone
     sf::Image thumbnail;

@@ -20,6 +20,7 @@ OnlineGameScreen::OnlineGameScreen(sf::RenderWindow& window, bool fillReserve) :
     cursor.setRadius(10);
     centerOrigin(cursor);
     cursor.setRotation(90);
+    window_.setMouseCursor(mouseCursor);
 
     recycleFeedback.setTexture(RessourceLoader::getTexture("sprites/bin.png"));
     centerOrigin(recycleFeedback);
