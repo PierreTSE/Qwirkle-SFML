@@ -3,13 +3,15 @@
 #include "Engine/Localisator.hpp"
 #include "Engine/RessourceLoader.hpp"
 #include "Engine/Utilities.hpp"
+#include "View/TitleScreen.hpp"
+
+#include <chrono>
+#include <ctime>
+#include <fstream>
+#include <iostream>
+
 
 void EndScreen::construct() {
-    std::sort(scores.begin(), scores.end(),
-              [](auto const& a, auto const& b) {
-                  return (a.second != b.second ? a.second > b.second : alphanum_less<decltype(a.first)>{}(a.first, b.first));
-              });
-
     // retire les marqueurs de coup
     grid.tiles.erase(std::remove_if(grid.tiles.begin(), grid.tiles.end(),
                                     [](auto const& e) { return e.shapeID == 6; }), grid.tiles.end());
@@ -28,8 +30,35 @@ void EndScreen::construct() {
 EndScreen::EndScreen(sf::RenderWindow& window, std::vector<std::unique_ptr<Player>> const& players, Grid grid) :
         Screen(window),
         grid{std::move(grid)} {
+    // écriture des stats
+    std::wofstream ofs("rc/stats", std::ios::app);
+    if (!ofs.is_open()) std::cerr << "Cannot open file to write results." << std::endl;
+    const auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    const std::string strtime = std::ctime(&time);
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    ofs << converter.from_bytes(strtime.substr(0, 24)) << ';';
+    if (players.size() > 1) {
+        if (players.front()->score != players.at(1)->score) {
+            if (players.front()->type() == ClientType::Ai) ofs << "Computer";
+            else ofs << "Human";
+        } else ofs << "Draw";
+    } else ofs << "Solo";
 
-    for (auto const& player : players) scores.emplace_back(player->name, player->score);
+    for (auto const& player : players) {
+        scores.emplace_back(player->name, player->score);
+    }
+
+    std::sort(scores.begin(), scores.end(),
+              [](auto const& a, auto const& b) {
+                  return (a.second != b.second ? a.second > b.second : alphanum_less<decltype(a.first)>{}(a.first, b.first));
+              });
+
+    for (auto const& score : scores) {
+        ofs << ';' << score.first << ", " << score.second;
+    }
+    ofs << std::endl;
+
+    ofs.close();
 
     construct();
 }
@@ -60,6 +89,7 @@ std::unique_ptr<Screen> EndScreen::execute() {
                         }
                             break;
                         case sf::Keyboard::Enter:
+                            return std::make_unique<TitleScreen>(window_);
                         case sf::Keyboard::Escape:
                             return nullptr;
                     }
