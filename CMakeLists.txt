@@ -32,4 +32,6 @@ endif ()
 
 find_package(SFML 2.5.1 REQUIRED graphics window system audio network)
 target_link_libraries(${EXECUTABLE_NAME} sfml-system sfml-window sfml-graphics sfml-audio sfml-network)
-target_link_libraries(${EXECUTABLE_NAME} stdc++fs)
+if (NOT APPLE)
+    target_link_libraries(${EXECUTABLE_NAME} stdc++fs)
+endif ()

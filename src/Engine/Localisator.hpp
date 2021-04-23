@@ -2,6 +2,7 @@
 #define LOCALISATOR_HPP
 
 #include <unordered_map>
+#include <string>
 
 
 class Localisator {

@@ -79,8 +79,9 @@ std::unique_ptr<Screen> ClientGameScreen::execute() {
                                         (rx != -1 && ry != -1 &&
                                          ((!recycleSelectionMode && player->rack.tiles.size() > rx && player->rack.tiles.at(rx).disp) ||
                                           (recycleSelectionMode && std::find_if(player->rack.tiles.begin(), player->rack.tiles.end(),
-                                                                                [&](Tile const& t) {
-                                                                                    return t.shapeID == 6 && t.coord.x == rx;
+                                                                                [&, rx = rx](Tile const &t) {
+                                                                                    return t.shapeID == 6 &&
+                                                                                           t.coord.x == rx;
                                                                                 })
                                                                    == player->rack.tiles.end())))) {
                                     if (mouseCursor.setType(sf::Cursor::Type::Hand)) window_.setMouseCursor(mouseCursor);
