@@ -164,3 +164,33 @@ unsigned int Controller::score(std::vector<TileDataWithCoord> const& moves) cons
     }
     return score;
 }
+
+bool Controller::isConnectedToSomeIn(sf::Vector2i const& coords, std::vector<TileDataWithCoord> const& input, Controller const& controller) {
+    if (input.empty()) return true;
+    const bool alignsWithAll = std::find_if_not(input.begin(), input.end(), [&](auto const& e) { return e.coord.x == coords.x; }) == input.end() ||
+                               std::find_if_not(input.begin(), input.end(), [&](auto const& e) { return e.coord.y == coords.y; }) == input.end();
+    if (!alignsWithAll) return false;
+
+    // vérifie que l'on peut tracer une ligne sans trou jusqu'à l'un des coups
+    for (auto const& move : input) {
+        auto const& goal_pos = move.coord;
+        if (goal_pos.y == coords.y) {
+            auto curr_pos = coords;
+            while (curr_pos != goal_pos) {
+                curr_pos.x += curr_pos.x < goal_pos.x ? 1 : -1;
+                // si trou
+                if (controller.emptyTile(curr_pos)) break;
+            }
+            if (curr_pos == goal_pos) return true;
+        } else if (goal_pos.x == coords.x) {
+            auto curr_pos = coords;
+            while (curr_pos != goal_pos) {
+                curr_pos.y += curr_pos.y < goal_pos.y ? 1 : -1;
+                // si trou
+                if (controller.emptyTile(curr_pos)) break;
+            }
+            if (curr_pos == goal_pos) return true;
+        }
+    }
+    return false;
+}

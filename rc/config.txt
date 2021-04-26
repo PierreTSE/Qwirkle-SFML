@@ -17,6 +17,8 @@ forceHints = bfalse
 showAiRack = bfalse
 # time in ms to wait after an AI has played
 waitAfterAiTurnTime = i0
+# AI strategy (RANDOM, GREEDY, MINMAX)
+aiStrategy = sGREEDY
 
 #### Online
 

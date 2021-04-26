@@ -29,6 +29,7 @@ struct Controller {
     std::vector<sf::Vector2i> legitMoves(TileData const& tile) const;
     std::vector<sf::Vector2i> legitMoves(Tile const& tile) const;
     unsigned int score(std::vector<TileDataWithCoord> const& moves) const;
+    static bool isConnectedToSomeIn(sf::Vector2i const& coords, std::vector<TileDataWithCoord> const& input, Controller const& controller);
 
     // members
     std::vector<Tile> reserve;

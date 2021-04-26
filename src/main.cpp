@@ -1,3 +1,4 @@
+#include "Benchmark/AIGameController.hpp"
 #include "Engine/RessourceLoader.hpp"
 #include "Engine/Settings.hpp"
 #include "View/TitleScreen.hpp"
@@ -13,6 +14,9 @@ int main(int argc, char** argv) {
     for (int i = 1; i < argc; ++i) {
         if (auto arg = std::string(argv[i]); arg == "--version" || arg == "-V") {
             std::cout << appName << std::endl;
+            std::exit(EXIT_SUCCESS);
+        } else if (arg == "--ai-benchmark") {
+            AIGameController::parseArgs(argc, argv);
             std::exit(EXIT_SUCCESS);
         }
     }

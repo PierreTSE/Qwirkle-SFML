@@ -1,17 +1,37 @@
 #include "Controller/Ai.hpp"
+#include "Engine/Settings.hpp"
+#include "Engine/Utilities.hpp"
 #include <iostream>
 #include <chrono>
+#include <utility>
+
+void Ai::initializeStrategyFromConfig() {
+    if (auto setting = Settings::get("aiStrategy")) {
+        auto str = std::get<std::string>(setting.value());
+        if (str == "RANDOM") strategy = ai::RANDOM;
+        else if (str == "GREEDY") strategy = ai::GREEDY;
+        else if (str == "MINMAX") strategy = ai::MINMAX;
+        else throw std::invalid_argument("Unknown AI strategy : " + str);
+    }
+}
 
 Ai::Ai(std::wstring name) {
     Player::name = std::move(name);
+    initializeStrategyFromConfig();
 }
 
-Ai::Ai(std::wstring name, Controller& controller, sf::Vector2u const& windowSize) : Player(std::move(name), controller, windowSize) {}
+Ai::Ai(std::wstring name, Controller& controller, sf::Vector2u const& windowSize)
+        : Player(std::move(name), controller, windowSize) {
+    initializeStrategyFromConfig();
+}
+
+Ai::Ai(std::wstring name, Controller& controller, ai::Strategy strategy)
+        : Player(std::move(name), controller, {0, 0}) {
+    this->strategy = strategy;
+}
 
 std::vector<TileDataWithCoord> Ai::play(Controller const& controller) {
     // cette fonction utilise des TileDataWithCoord pour éviter de devoir copier des sf::Sprite en manipulant des Tile
-
-    uint32_t max_score = 0; // score max possible
 
     std::vector<TileDataWithCoord> tilesPool; // rack de TileDataWithCoord
     tilesPool.insert(tilesPool.end(), rack.tiles.begin(), rack.tiles.end());
@@ -19,17 +39,17 @@ std::vector<TileDataWithCoord> Ai::play(Controller const& controller) {
     Controller controllerCopy(false); // copie de controller
     controllerCopy.map = controller.map;
 
-    std::sort(tilesPool.begin(), tilesPool.end());
-    do {
-        auto input = tilesPool;
-        std::pair<uint32_t, std::vector<TileDataWithCoord>> potential_moves = {0, {}};
-        potential_moves.second.reserve(6);
-        bestMove(controllerCopy, input, potential_moves);
-        if (potential_moves.first > max_score) {
-            max_score = potential_moves.first;
-            moves = potential_moves.second;
-        }
-    } while (std::next_permutation(tilesPool.begin(), tilesPool.end()));
+    std::pair<uint32_t, std::vector<TileDataWithCoord>> returned;
+    switch (strategy) {
+        case ai::RANDOM: returned = evaluateRandom(tilesPool, controllerCopy);
+            break;
+        case ai::GREEDY: returned = evaluateGreedy(tilesPool, controllerCopy);
+            break;
+        case ai::MINMAX: returned = evaluateMinmax(tilesPool, controllerCopy);
+            break;
+    }
+    uint32_t max_score = returned.first;
+    moves = returned.second;
 
     // marque les éléments à supprimer du rack
     for (auto const& move : moves) {
@@ -42,15 +62,55 @@ std::vector<TileDataWithCoord> Ai::play(Controller const& controller) {
     return moves;
 }
 
-void Ai::bestMove(Controller& controller, std::vector<TileDataWithCoord>& input, std::pair<uint32_t, std::vector<TileDataWithCoord>>& output) {
+std::pair<uint32_t, std::vector<TileDataWithCoord>> Ai::evaluateRandom(std::vector<TileDataWithCoord>& tilesPool, Controller& controllerCopy) const {
+
+    std::pair<uint32_t, std::vector<TileDataWithCoord>> returned = {0, {}};
+
+    std::shuffle(tilesPool.begin(), tilesPool.end(), RandomEngine::instance());
+    std::pair<uint32_t, std::vector<TileDataWithCoord>> potential_moves = {0, {}};
+    potential_moves.second.reserve(6);
+    do {
+        auto input = tilesPool;
+        potential_moves.first = 0;
+        potential_moves.second.clear();
+        bestMove(controllerCopy, input, potential_moves);
+        if (potential_moves.first > 0) {
+            returned = potential_moves;
+        }
+    } while (std::next_permutation(tilesPool.begin(), tilesPool.end()));
+
+    return returned;
+}
+
+std::pair<uint32_t, std::vector<TileDataWithCoord>> Ai::evaluateGreedy(std::vector<TileDataWithCoord>& tilesPool, Controller& controllerCopy) const {
+
+    std::pair<uint32_t, std::vector<TileDataWithCoord>> returned = {0, {}};
+
+    std::sort(tilesPool.begin(), tilesPool.end());
+    do {
+        auto input = tilesPool;
+        std::pair<uint32_t, std::vector<TileDataWithCoord>> potential_moves = {0, {}};
+        potential_moves.second.reserve(6);
+        bestMove(controllerCopy, input, potential_moves);
+        if (potential_moves.first > returned.first) {
+            returned = potential_moves;
+        }
+    } while (std::next_permutation(tilesPool.begin(), tilesPool.end()));
+
+    return returned;
+}
+
+std::pair<uint32_t, std::vector<TileDataWithCoord>> Ai::evaluateMinmax(std::vector<TileDataWithCoord>& tilesPool, Controller& controllerCopy) const {
+}
+
+void Ai::bestMove(Controller& controller, std::vector<TileDataWithCoord>& input, std::pair<uint32_t, std::vector<TileDataWithCoord>>& output) const {
     if (input.empty()) return;
     auto curr_tile = input.back();
     input.pop_back();
     // construit les moves possibles
     auto legitMoves = controller.legitMoves(curr_tile);
     legitMoves.erase(std::remove_if(legitMoves.begin(), legitMoves.end(),
-                                    [&](auto const& e) { return !isConnectedToSomeIn(e, output.second, controller); }), legitMoves.end());
-
+                                    [&](auto const& e) { return !Controller::isConnectedToSomeIn(e, output.second, controller); }), legitMoves.end());
 
     std::pair<uint32_t, sf::Vector2i> currBestMove = {0, {-1, -1}}; // best <score, coord>
     if (controller.map.empty()) {
@@ -82,36 +142,6 @@ void Ai::bestMove(Controller& controller, std::vector<TileDataWithCoord>& input,
     controller.map.erase(currBestMove.second); // on clean le controller pour l'utiliser dans d'autres combinaisons
 }
 
-bool Ai::isConnectedToSomeIn(sf::Vector2i const& coords, std::vector<TileDataWithCoord> const& input, Controller const& controller) {
-    if (input.empty()) return true;
-    const bool alignsWithAll = std::find_if_not(input.begin(), input.end(), [&](auto const& e) { return e.coord.x == coords.x; }) == input.end() ||
-                               std::find_if_not(input.begin(), input.end(), [&](auto const& e) { return e.coord.y == coords.y; }) == input.end();
-    if (!alignsWithAll) return false;
-
-    // vérifie que l'on peut tracer une ligne sans trou jusqu'à l'un des coups
-    for (auto const& move : input) {
-        auto const& goal_pos = move.coord;
-        if (goal_pos.y == coords.y) {
-            auto curr_pos = coords;
-            while (curr_pos != goal_pos) {
-                curr_pos.x += curr_pos.x < goal_pos.x ? 1 : -1;
-                // si trou
-                if (controller.emptyTile(curr_pos)) break;
-            }
-            if (curr_pos == goal_pos) return true;
-        } else if (goal_pos.x == coords.x) {
-            auto curr_pos = coords;
-            while (curr_pos != goal_pos) {
-                curr_pos.y += curr_pos.y < goal_pos.y ? 1 : -1;
-                // si trou
-                if (controller.emptyTile(curr_pos)) break;
-            }
-            if (curr_pos == goal_pos) return true;
-        }
-    }
-    return false;
-}
-
 void Ai::recycle(Controller& controller) {
     // recycle toutes les tuiles
     auto toRefill = rack.tiles.size();
@@ -124,4 +154,20 @@ void Ai::recycle(Controller& controller) {
 
 ClientType Ai::type() const {
     return ClientType::Ai;
+}
+
+std::string ai::strategyName(ai::Strategy strategy) {
+    switch (strategy) {
+        case RANDOM: return "RANDOM";
+        case GREEDY: return "GREEDY";
+        case MINMAX: return "MINMAX";
+        default: throw std::invalid_argument("");
+    }
+}
+
+ai::Strategy ai::fromString(std::string const& name) {
+    if (name == "RANDOM") return RANDOM;
+    else if (name == "GREEDY") return GREEDY;
+    else if (name == "MINMAX") return MINMAX;
+    else throw std::invalid_argument("Cannot convert to strategy :" + name);
 }
