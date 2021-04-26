@@ -1,6 +1,7 @@
 #ifndef LOCALISATOR_HPP
 #define LOCALISATOR_HPP
 
+#include <string>
 #include <unordered_map>
 
 

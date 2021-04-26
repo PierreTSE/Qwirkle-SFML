@@ -2,6 +2,7 @@
 #define SETTINGS_HPP
 
 #include <optional>
+#include <string>
 #include <unordered_map>
 #include <variant>
 
